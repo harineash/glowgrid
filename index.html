@@ -4076,32 +4076,13 @@ function computeZoneRectangles(){
   }).filter(Boolean);
 }
 
-// Draws each zone's rectangular cell as a dashed square/rectangle +
-// label on the Live Map — guaranteed non-overlapping since cells tile
-// a fixed grid over the campus.
+// Zone overlays are intentionally NOT drawn on the Live Map (Leaflet) —
+// they are shown only on the Grid map (see renderGridZoneOverlays()).
+// Kept as a no-op (rather than deleted) so existing call sites elsewhere
+// in the app stay harmless; it just clears any previously-drawn layer.
 function renderZoneOverlays(){
   if(!osmLightMapInstance) return;
-  if(zoneOverlayLayer){ osmLightMapInstance.removeLayer(zoneOverlayLayer); }
-  zoneOverlayLayer = L.layerGroup().addTo(osmLightMapInstance);
-
-  computeZoneRectangles().forEach(({ zone, color, count, latMin, latMax, lonMin, lonMax }) => {
-    L.rectangle([[latMin, lonMin], [latMax, lonMax]], {
-      color, weight: 1.5, dashArray: '5,5', fillColor: color, fillOpacity: 0.07, interactive: false
-    }).addTo(zoneOverlayLayer);
-
-    // Anchored to each cell's own top-left corner (not a shared row) so
-    // labels naturally spread out with their non-overlapping cells,
-    // and stay compact enough to read even at this map's minimum zoom.
-    const label = L.divIcon({
-      className: 'zone-label-icon',
-      html: `<div style="font-family:'Share Tech Mono',monospace;font-size:9px;font-weight:700;color:${color};
-        background:rgba(2,10,18,0.88);border:1px solid ${color};border-radius:4px;padding:1px 5px;
-        white-space:nowrap;box-shadow:0 0 6px ${color}55;">ZONE ${zone} · ${count}</div>`,
-      iconSize: [76, 16],
-      iconAnchor: [-3, -3]
-    });
-    L.marker([latMax, lonMin], { icon: label, interactive: false }).addTo(zoneOverlayLayer);
-  });
+  if(zoneOverlayLayer){ osmLightMapInstance.removeLayer(zoneOverlayLayer); zoneOverlayLayer = null; }
 }
 window.renderZoneOverlays = renderZoneOverlays;
 
@@ -4290,10 +4271,13 @@ function addLightNodeToMap(node){
 // Bounds are set to the BIT Sathy campus footprint (~1km x 1km around
 // the 11.4986°N, 77.2743°E campus centre) so every light — seeded or
 // newly added — lands inside the visible viewBox.
+// North-up convention: longitude increases left→right (east), and
+// latitude increases bottom→top (north), matching a real-world map —
+// so higher latitude = smaller y (further up the SVG).
 const GRID_BOUNDS = { latMin: 11.4930, latMax: 11.5030, lonMin: 77.2690, lonMax: 77.2790 };
 function latLonToGridXY(lat, lon){
   const x = ((lon - GRID_BOUNDS.lonMin) / (GRID_BOUNDS.lonMax - GRID_BOUNDS.lonMin)) * 700;
-  const y = ((lat - GRID_BOUNDS.latMin) / (GRID_BOUNDS.latMax - GRID_BOUNDS.latMin)) * 340;
+  const y = ((GRID_BOUNDS.latMax - lat) / (GRID_BOUNDS.latMax - GRID_BOUNDS.latMin)) * 340;
   return {
     x: Math.min(685, Math.max(15, x)),
     y: Math.min(325, Math.max(15, y))
@@ -4358,7 +4342,7 @@ function renderGridZoneOverlays(){
   const ns = 'http://www.w3.org/2000/svg';
 
   computeZoneRectangles().forEach(({ zone, color, count, latMin, latMax, lonMin, lonMax }) => {
-    // lat increases downward in this grid's convention (matches latLonToGridXY)
+    // North-up convention (matches latLonToGridXY): higher latitude = smaller y
     const topLeft = latLonToGridXY(latMax, lonMin);
     const bottomRight = latLonToGridXY(latMin, lonMax);
     const x = Math.min(topLeft.x, bottomRight.x);
@@ -4894,7 +4878,7 @@ const mapSvg=document.getElementById('mainMap');
 if(mapSvg){
   mapSvg.addEventListener('mousemove',e=>{
     const r=e.currentTarget.getBoundingClientRect();
-    const lat=(GRID_BOUNDS.latMin+(e.clientY-r.top)/r.height*(GRID_BOUNDS.latMax-GRID_BOUNDS.latMin)).toFixed(4);
+    const lat=(GRID_BOUNDS.latMax-(e.clientY-r.top)/r.height*(GRID_BOUNDS.latMax-GRID_BOUNDS.latMin)).toFixed(4);
     const lon=(GRID_BOUNDS.lonMin+(e.clientX-r.left)/r.width*(GRID_BOUNDS.lonMax-GRID_BOUNDS.lonMin)).toFixed(4);
     document.getElementById('map-coord').textContent='LAT: '+lat+' · LON: '+lon;
   });
