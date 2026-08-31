@@ -3163,6 +3163,13 @@ function zoneColor(z){ return ZONE_COLORS[z] || '#00e5ff'; }
 //                                  this over LoRa to the target node only.
 //   Topic "streetlights/ack"    → streetlight confirms a command took effect:
 //                                  {"node":"SL-01","command":"SIREN_ON","status":"ACTIVE"}
+//   Topic "streetlights/silence" → WEBSITE-TO-WEBSITE broadcast only (never
+//                                  touched by hardware): the instant any
+//                                  logged-in session presses "Silence", it
+//                                  publishes {"nodes":["SL-01","SL-02"]} here
+//                                  so every other open login (any browser,
+//                                  any device) silences the same SOS at the
+//                                  same moment instead of only muting locally.
 // ══════════════════════════════════════════════════════════════════
 const MQTT_WS_URL = 'wss://broker.hivemq.com:8884/mqtt';
 const MQTT_DATA_TOPIC = 'streetlights/data';
@@ -3170,6 +3177,7 @@ const MQTT_STATUS_TOPIC = 'streetlights/status';
 const MQTT_SOS_TOPIC = 'streetlights/sos';
 const MQTT_COMMAND_TOPIC = 'streetlights/command';
 const MQTT_ACK_TOPIC = 'streetlights/ack';
+const MQTT_SILENCE_TOPIC = 'streetlights/silence';
 
 // Latest known remote-siren state per light: { command:'SIREN_ON'|'SIREN_OFF',
 // status:'PENDING'|'ACTIVE'|'OFF', ts }. PENDING is set the moment the website
@@ -3335,7 +3343,7 @@ function initMqttLive(){
 
   mqttLiveClient.on('connect', () => {
     setMqttStatusBadge('connected');
-    mqttLiveClient.subscribe([MQTT_DATA_TOPIC, MQTT_STATUS_TOPIC, MQTT_SOS_TOPIC, MQTT_ACK_TOPIC], (err) => {
+    mqttLiveClient.subscribe([MQTT_DATA_TOPIC, MQTT_STATUS_TOPIC, MQTT_SOS_TOPIC, MQTT_ACK_TOPIC, MQTT_SILENCE_TOPIC], (err) => {
       if(err) console.warn('MQTT subscribe failed', err);
     });
   });
@@ -3363,6 +3371,12 @@ function initMqttLive(){
     }
     if(topic === MQTT_ACK_TOPIC){
       handleSirenAck(text);
+      return;
+    }
+    if(topic === MQTT_SILENCE_TOPIC){
+      let payload = {};
+      try { payload = JSON.parse(text); } catch(e){ console.warn('Bad silence-broadcast JSON', e); return; }
+      applyRemoteSilence(payload.nodes);
     }
   });
 }
@@ -3522,7 +3536,28 @@ window.startSiren = startSiren;
 // it receives an explicit SIREN_OFF — sends that real command to the
 // node that triggered the SOS. Without this, clicking "Silence" would
 // only quiet the webpage while the physical pole siren kept blaring.
+// It also broadcasts the silence over MQTT so every other currently
+// logged-in session (any browser/device watching the Patrol page)
+// silences the same SOS at the same time, instead of only muting here.
 function stopSiren(){
+  const silencedIds = currentSosNodeIds.slice();
+
+  teardownLocalSirenUI();
+
+  if(silencedIds.length){
+    silencedIds.forEach(id => publishSirenCommand(id, 'SIREN_OFF'));
+    // Silenced — turn the node(s) back to green on the Pink Patrol map.
+    if(typeof setPatrolNodeSos === 'function') setPatrolNodeSos(silencedIds, false);
+    currentSosNodeIds = [];
+    broadcastSirenSilenced(silencedIds);
+  }
+}
+window.stopSiren = stopSiren;
+
+// Just the local sound/visual teardown, shared by stopSiren() (this
+// session pressed Silence) and applyRemoteSilence() (another logged-in
+// session pressed it first).
+function teardownLocalSirenUI(){
   sirenActive = false;
   document.getElementById('siren-overlay').style.display = 'none';
   document.getElementById('siren-banner').style.display = 'none';
@@ -3534,15 +3569,37 @@ function stopSiren(){
     sirenOscillator = null;
   }
   if(sirenGain){ sirenGain.disconnect(); sirenGain = null; }
-
-  if(currentSosNodeIds && currentSosNodeIds.length){
-    currentSosNodeIds.forEach(id => publishSirenCommand(id, 'SIREN_OFF'));
-    // Silenced — turn the node(s) back to green on the Pink Patrol map.
-    if(typeof setPatrolNodeSos === 'function') setPatrolNodeSos(currentSosNodeIds, false);
-    currentSosNodeIds = [];
-  }
 }
-window.stopSiren = stopSiren;
+
+// Tells every OTHER logged-in session (any browser/device with this
+// dashboard open) that this SOS has been silenced here, so they mute
+// and turn the node(s) green in lockstep instead of staying red/loud
+// until someone happens to press Silence on that device too.
+function broadcastSirenSilenced(ids){
+  if(!mqttLiveClient || !mqttLiveClient.connected || !ids || !ids.length) return;
+  mqttLiveClient.publish(MQTT_SILENCE_TOPIC, JSON.stringify({ nodes: ids, ts: Date.now() }));
+}
+window.broadcastSirenSilenced = broadcastSirenSilenced;
+
+// Runs when THIS session receives a silence broadcast that another
+// logged-in session triggered. Mirrors the local "Silence" action —
+// stop the local siren sound/banner (if it was even sounding here) and
+// turn the node(s) green on the Pink Patrol map — without re-publishing
+// SIREN_OFF (the originating session already sent that) or re-broadcasting
+// (which would loop the two sessions off each other forever).
+function applyRemoteSilence(ids){
+  if(!Array.isArray(ids) || !ids.length) return;
+
+  const stillActive = currentSosNodeIds.filter(id => !ids.includes(id));
+  if(stillActive.length !== currentSosNodeIds.length && !stillActive.length){
+    teardownLocalSirenUI();
+  }
+  currentSosNodeIds = stillActive;
+
+  if(typeof setPatrolNodeSos === 'function') setPatrolNodeSos(ids, false);
+  if(window.showToast) showToast('🔇 SOS silenced on another login — ' + ids.join(' & '), '#00e676');
+}
+window.applyRemoteSilence = applyRemoteSilence;
 
 // data looks like: {"SL-01":{"voltage":230.1,"current":1.24,"power":278.3,"pf":0.93,"status":"ON"}, ...}
 function applyLiveTelemetry(data){
