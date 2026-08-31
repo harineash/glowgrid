@@ -4128,24 +4128,13 @@ function initHomeOsmMap(){
   const el = document.getElementById('osm-light-map');
   if(!el || osmLightMapInstance || typeof L === 'undefined') return;
 
-  // minZoom keeps the view locked to the campus itself — zooming out
-  // further than this crams all 10 pins and every zone label into a
-  // tiny corner of a much wider (and, per the satellite imagery,
-  // frequently cloud-covered) view of the whole town, which becomes
-  // unreadable. maxBounds gives a soft leash so panning can't wander
-  // off far into the surrounding town either.
-  const campusBoundsPad = 0.012;
-  const softBounds = L.latLngBounds(
-    [11.4986 - campusBoundsPad, 77.2743 - campusBoundsPad],
-    [11.4986 + campusBoundsPad, 77.2743 + campusBoundsPad]
-  );
-
+  // minZoom keeps zooming out from producing an unreadable, cloud-covered
+  // view of the whole town — but panning itself is intentionally left
+  // unrestricted (no maxBounds) so the map is fully draggable anywhere.
   osmLightMapInstance = L.map(el, {
     zoomControl: true,
     attributionControl: true,
-    minZoom: 16,
-    maxBounds: softBounds,
-    maxBoundsViscosity: 0.7
+    minZoom: 16
   }).setView([11.4986, 77.2743], 17);
 
   osmStreetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
