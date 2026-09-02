@@ -1447,7 +1447,7 @@ function logoutApp(){
             <div style="font-family:'Orbitron',monospace;font-size:20px;font-weight:700;color:var(--cyan);" id="ld-frequency">—</div>
           </div>
           <div style="background:rgba(0,230,118,0.05);border:1px solid rgba(0,230,118,0.15);border-radius:10px;padding:12px;grid-column:1 / -1;">
-            <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">ENERGY (SINCE CONNECTED)</div>
+            <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">ENERGY (METER TOTAL)</div>
             <div style="font-family:'Orbitron',monospace;font-size:20px;font-weight:700;color:var(--green);" id="ld-energy">—</div>
           </div>
         </div>
@@ -2625,139 +2625,6 @@ function logoutApp(){
           </tbody>
         </table>
       </div>
-
-      <div class="pp-sos" id="pp-sos-card">
-        <div class="pp-sos-badge"><span class="pp-sos-dot"></span>URGENT SOS</div>
-        <div class="pp-sos-title">Signal from SL-06</div>
-        <div class="pp-sos-desc">Location detected at Boys Hostel Gate, Bannari Amman College, Erode. Immediate response required.</div>
-        <div class="pp-sos-map">
-          <svg viewBox="0 0 260 160" style="width:100%;display:block;">
-            <rect width="260" height="160" fill="#f3e4ea"/>
-            <line x1="0" y1="30" x2="260" y2="30" stroke="#e0c3cf" stroke-width="3"/>
-            <line x1="0" y1="90" x2="260" y2="70" stroke="#e0c3cf" stroke-width="3"/>
-            <line x1="40" y1="0" x2="10" y2="160" stroke="#e0c3cf" stroke-width="3"/>
-            <line x1="130" y1="0" x2="150" y2="160" stroke="#e0c3cf" stroke-width="4"/>
-            <line x1="220" y1="0" x2="240" y2="160" stroke="#e0c3cf" stroke-width="3"/>
-            <line x1="0" y1="120" x2="260" y2="130" stroke="#e0c3cf" stroke-width="3"/>
-            <circle cx="150" cy="70" r="5" fill="#8a1436"/>
-            <circle cx="150" cy="70" r="10" fill="none" stroke="#8a1436" stroke-width="2" opacity="0.5"/>
-            <path d="M118 96 L128 78 L138 96 Z" fill="#c41c4e" stroke="#fff" stroke-width="1.5"/>
-            <circle cx="128" cy="82" r="3" fill="#fff"/>
-          </svg>
-        </div>
-        <button class="pp-dispatch-btn" onclick="ppelSosDispatch('SL-06','Boys Hostel Gate, Bannari Amman College')">⚡ Activate Emergency Lighting</button>
-        <div style="display:flex;gap:8px;margin-top:8px;">
-          <button class="pp-dispatch-btn" style="background:rgba(255,255,255,0.16);color:#fff;flex:1;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="ppCallUnit('SL-06','Boys Hostel Gate, Bannari Amman College')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Call
-          </button>
-          <button class="pp-dispatch-btn" style="background:rgba(255,255,255,0.16);color:#fff;flex:1;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="ppMessageUnit('SL-06','Boys Hostel Gate, Bannari Amman College')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Message
-          </button>
-        </div>
-        <button class="pp-dispatch-btn" style="background:rgba(255,255,255,0.12);color:#fff;width:100%;margin-top:8px;border:1px dashed rgba(255,255,255,0.4);font-size:12px;" onclick="triggerSosSiren(['SL-01','SL-02'],'Bannari Amman College, Erode — manual test')" title="Simulates a physical panic-button press over MQTT for testing, without needing real hardware — sends to SL-01 and SL-02">
-          🔊 Test Siren (simulate button press → SL-01 &amp; SL-02)
-        </button>
-      </div>
-    </div>
-
-    <!-- ══ EMERGENCY LIGHTING MODE ══ -->
-    <div class="ppel-card" id="ppel-card">
-      <div class="ppel-head">
-        <div class="ppel-title-wrap">
-          <div class="ppel-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
-          <div>
-            <div class="ppel-title">Emergency Lighting Mode</div>
-            <div class="ppel-sub">AUTO-LINKED · SOS → STREET LIGHTS → PATROL DISPATCH</div>
-          </div>
-        </div>
-        <div class="ppel-toggle-wrap">
-          AUTO-LINK
-          <div class="ppel-switch" id="ppel-autolink-switch" onclick="ppelToggleAutolink()" title="When ON, SOS dispatch auto-triggers Emergency Lighting"></div>
-        </div>
-      </div>
-      <div class="ppel-body">
-        <div class="ppel-pipeline" id="ppel-pipeline">
-          <div class="ppel-step" data-step="1">
-            <div class="ppel-dot">1</div>
-            <div class="ppel-step-body">
-              <div class="ppel-step-lbl">SOS Detected</div>
-              <div class="ppel-step-meta" id="ppel-meta-1">Awaiting signal…</div>
-            </div>
-          </div>
-          <div class="ppel-step" data-step="2">
-            <div class="ppel-dot">2</div>
-            <div class="ppel-step-body">
-              <div class="ppel-step-lbl">Identify Location</div>
-              <div class="ppel-step-meta" id="ppel-meta-2">—</div>
-            </div>
-          </div>
-          <div class="ppel-step" data-step="3">
-            <div class="ppel-dot">3</div>
-            <div class="ppel-step-body">
-              <div class="ppel-step-lbl">Find Nearby Street Lights</div>
-              <div class="ppel-step-meta" id="ppel-meta-3">—</div>
-            </div>
-          </div>
-          <div class="ppel-step" data-step="4">
-            <div class="ppel-dot">4</div>
-            <div class="ppel-step-body">
-              <div class="ppel-step-lbl">Increase Nearby Lights to 100% Brightness</div>
-              <div class="ppel-step-meta"><div class="ppel-lights-list" id="ppel-lights-list"></div></div>
-            </div>
-          </div>
-          <div class="ppel-step" data-step="5">
-            <div class="ppel-dot">5</div>
-            <div class="ppel-step-body">
-              <div class="ppel-step-lbl">Highlight Emergency Zone on Map</div>
-              <div class="ppel-step-meta" id="ppel-meta-5">—</div>
-            </div>
-          </div>
-          <div class="ppel-step" data-step="6">
-            <div class="ppel-dot">6</div>
-            <div class="ppel-step-body">
-              <div class="ppel-step-lbl">Dispatch Patrol</div>
-              <div class="ppel-step-meta" id="ppel-meta-6">—</div>
-            </div>
-          </div>
-          <div class="ppel-step" data-step="7">
-            <div class="ppel-dot">7</div>
-            <div class="ppel-step-body">
-              <div class="ppel-step-lbl">Track Response</div>
-              <div class="ppel-step-meta" id="ppel-meta-7">—</div>
-            </div>
-          </div>
-        </div>
-        <div class="ppel-side">
-          <div class="ppel-mapbox">
-            <svg id="ppel-map-svg" viewBox="0 0 260 170" style="width:100%;display:block;">
-              <rect width="260" height="170" fill="var(--pp-bg)"/>
-              <line x1="0" y1="35" x2="260" y2="30" stroke="var(--pp-border)" stroke-width="3"/>
-              <line x1="0" y1="95" x2="260" y2="80" stroke="var(--pp-border)" stroke-width="3"/>
-              <line x1="45" y1="0" x2="15" y2="170" stroke="var(--pp-border)" stroke-width="3"/>
-              <line x1="135" y1="0" x2="150" y2="170" stroke="var(--pp-border)" stroke-width="4"/>
-              <line x1="225" y1="0" x2="240" y2="170" stroke="var(--pp-border)" stroke-width="3"/>
-              <circle id="ppel-zone" cx="132" cy="80" r="55" fill="rgba(196,28,78,0.14)" stroke="var(--pp-pink)" stroke-width="1.5" opacity="0" style="transition:opacity .5s;"/>
-              <circle class="ppel-light-node" data-lid="1" cx="95" cy="60" r="5" fill="#c7cad6" style="transition:fill .3s;"/>
-              <circle class="ppel-light-node" data-lid="2" cx="150" cy="52" r="5" fill="#c7cad6" style="transition:fill .3s;"/>
-              <circle class="ppel-light-node" data-lid="3" cx="172" cy="95" r="5" fill="#c7cad6" style="transition:fill .3s;"/>
-              <circle class="ppel-light-node" data-lid="4" cx="112" cy="108" r="5" fill="#c7cad6" style="transition:fill .3s;"/>
-              <circle class="ppel-light-node" data-lid="5" cx="150" cy="118" r="5" fill="#c7cad6" style="transition:fill .3s;"/>
-              <circle class="ppel-light-node" data-lid="6" cx="88" cy="100" r="5" fill="#c7cad6" style="transition:fill .3s;"/>
-              <path d="M124 74 L134 56 L144 74 Z" fill="var(--pp-pink)" stroke="#fff" stroke-width="1.5"/>
-              <circle cx="134" cy="60" r="3" fill="#fff"/>
-            </svg>
-          </div>
-          <div class="ppel-stats">
-            <div class="ppel-stat"><div class="ppel-stat-lbl">LIGHTS BOOSTED</div><div class="ppel-stat-num pink" id="ppel-count">0</div></div>
-            <div class="ppel-stat"><div class="ppel-stat-lbl">ZONE RADIUS</div><div class="ppel-stat-num" id="ppel-radius">—</div></div>
-          </div>
-          <div class="ppel-status-line idle" id="ppel-status"><span class="ppel-status-dot"></span><span id="ppel-status-txt">STANDBY · NO ACTIVE SOS</span></div>
-          <button class="ppel-btn" id="ppel-activate-btn" onclick="activateEmergencyLighting('SL-06','Boys Hostel Gate, Bannari Amman College')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-            Activate Emergency Lighting Protocol
-          </button>
-        </div>
-      </div>
     </div>
   </div>
 </div>
@@ -2877,9 +2744,12 @@ function ppelSetStatus(text, active){
   if(line) line.classList.toggle('idle', !active);
 }
 
-function activateEmergencyLighting(lightId, location){
+function activateEmergencyLighting(lightIdOrIds, location){
   if(ppelRunning) return;
   ppelRunning = true;
+
+  const ids = Array.isArray(lightIdOrIds) ? lightIdOrIds : [lightIdOrIds];
+  const idsLabel = ids.join(', ');
 
   const btn = document.getElementById('ppel-activate-btn');
   const boltIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>';
@@ -2895,7 +2765,7 @@ function activateEmergencyLighting(lightId, location){
   const radEl = document.getElementById('ppel-radius'); if(radEl) radEl.textContent = '—';
 
   ppelSetStatus('SOS SIGNAL RECEIVED — INITIATING PROTOCOL', true);
-  ppelSetStep(1, 'Signal received from ' + lightId);
+  ppelSetStep(1, 'Signal received from ' + idsLabel);
 
   setTimeout(() => {
     ppelSetStep(2, location + ' · GPS lock acquired');
@@ -3485,7 +3355,7 @@ function triggerSosSiren(lightId, location){
   // Emergency Lighting Protocol" — works even from another tab, since
   // that function and its state live in the same global script scope.
   if(typeof activateEmergencyLighting === 'function' && !ppelRunning){
-    activateEmergencyLighting(ids[0], location);
+    activateEmergencyLighting(ids, location);
   }
 }
 window.triggerSosSiren = triggerSosSiren;
