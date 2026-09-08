@@ -1446,9 +1446,16 @@ function logoutApp(){
             <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">FREQUENCY</div>
             <div style="font-family:'Orbitron',monospace;font-size:20px;font-weight:700;color:var(--cyan);" id="ld-frequency">—</div>
           </div>
-          <div style="background:rgba(0,230,118,0.05);border:1px solid rgba(0,230,118,0.15);border-radius:10px;padding:12px;grid-column:1 / -1;">
-            <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;">ENERGY (METER TOTAL)</div>
-            <div style="font-family:'Orbitron',monospace;font-size:20px;font-weight:700;color:var(--green);" id="ld-energy">—</div>
+          <div style="background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.2);border-radius:10px;padding:12px;grid-column:1 / -1;">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px;">
+              <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;">ENERGY TODAY</span>
+              <span style="font-family:'Share Tech Mono',monospace;font-size:8.5px;color:var(--muted);" id="ld-energy-since">since 12:00 AM</span>
+            </div>
+            <div style="font-family:'Orbitron',monospace;font-size:22px;font-weight:700;color:var(--green);" id="ld-energy-today">—</div>
+          </div>
+          <div style="background:rgba(0,210,255,0.04);border:1px solid rgba(0,210,255,0.1);border-radius:10px;padding:10px 12px;grid-column:1 / -1;display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;">METER TOTAL (LIFETIME)</span>
+            <span style="font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:var(--cyan);" id="ld-energy">—</span>
           </div>
         </div>
 
@@ -3072,8 +3079,46 @@ const MQTT_SILENCE_TOPIC = 'streetlights/silence';
 // publishes a command and cleared once the real ACK arrives from hardware.
 const LIGHT_SIREN_STATE = {};
 
-// Latest telemetry per light ID: { voltage, current, power, pf, freq, kwh, ts }
+// Latest telemetry per light ID: { voltage, current, power, pf, freq, kwh, kwhToday, ts }
 const LIGHT_LIVE_DATA = {};
+
+// id -> { date:'YYYY-MM-DD' (IST), startKwh } — the meter/estimate
+// reading captured at the start of each IST calendar day, so "Energy
+// Today" can be computed as (current kwh − startKwh) and naturally
+// resets itself the first time a reading comes in after midnight IST.
+const LIGHT_DAILY_BASELINE = {};
+
+// Returns 'YYYY-MM-DD' for the given timestamp IN IST (UTC+5:30) —
+// deliberately NOT the viewer's browser timezone, so "midnight" always
+// means midnight at the campus (Tamil Nadu, India), regardless of where
+// the dashboard is being viewed from.
+function getIstDateString(ts){
+  const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+  const istMs = ts + IST_OFFSET_MS;
+  const d = new Date(istMs);
+  const yyyy = d.getUTCFullYear();
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(d.getUTCDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+window.getIstDateString = getIstDateString;
+
+// Formats a timestamp as "h:mm AM/PM" in IST — used so the "Energy
+// Today" card can honestly say when tracking for today actually began
+// (exactly midnight if the dashboard was already connected then, or
+// whatever time it first connected today otherwise) rather than always
+// claiming "since 12:00 AM" regardless of the truth.
+function formatIstTime(ts){
+  const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+  const d = new Date(ts + IST_OFFSET_MS);
+  let h = d.getUTCHours();
+  const m = String(d.getUTCMinutes()).padStart(2, '0');
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12; if(h === 0) h = 12;
+  return `${h}:${m} ${ampm}`;
+}
+window.formatIstTime = formatIstTime;
+
 // id -> ms timestamp of when a light most recently became faulty (used
 // to prioritize the Technician View by how long something's been broken).
 const LIGHT_FAULT_SINCE = {};
@@ -3510,7 +3555,7 @@ function applyLiveTelemetry(data){
     const now = Date.now();
 
     // Riemann-sum energy accumulation (kWh) since the last reading for
-    // this light — this is what powers the "Energy" figure in the
+    // this light — this is what powers the "Meter Total" figure in the
     // light detail panel. Skipped on the very first reading (no prior ts).
     // If the firmware already reports a cumulative energy field, prefer
     // that (more accurate than our client-side estimate).
@@ -3523,9 +3568,23 @@ function applyLiveTelemetry(data){
       kwh += (power / 1000) * hoursElapsed;
     }
 
+    // "Energy Today" resets every midnight (00:00 IST — the campus's
+    // local time, not the viewer's browser timezone, so the reset lines
+    // up with the physical site regardless of who's looking at the
+    // dashboard or from where). We track a per-light baseline: the
+    // meter/estimate reading captured at the first update seen on each
+    // new IST calendar day. Today's usage is just current − baseline.
+    const todayIst = getIstDateString(now);
+    let baseline = LIGHT_DAILY_BASELINE[id];
+    if(!baseline || baseline.date !== todayIst){
+      baseline = { date: todayIst, startKwh: kwh, ts: now };
+      LIGHT_DAILY_BASELINE[id] = baseline;
+    }
+    const kwhToday = Math.max(0, kwh - baseline.startKwh);
+
     const { status: newStatus, reasons } = classifyLightReading(id, { voltage, current, power, pf, freq, hasFreq });
 
-    LIGHT_LIVE_DATA[id] = { voltage, current, power, pf, freq: hasFreq ? freq : null, kwh, reasons, ts: now };
+    LIGHT_LIVE_DATA[id] = { voltage, current, power, pf, freq: hasFreq ? freq : null, kwh, kwhToday, reasons, ts: now };
 
     const node = LIGHT_NODES.find(n => n.id === id);
     if(!node) return; // telemetry for a light not currently on the map — ignore
@@ -4335,6 +4394,7 @@ function removeStreetLight(id, opts){
   deleteLightFromApi(id);
   delete LIGHT_LIVE_DATA[id];
   delete LIGHT_FAULT_SINCE[id];
+  delete LIGHT_DAILY_BASELINE[id];
 
   // Remove from OSM live map
   if(window.osmMarkers && window.osmMarkers[id]){
@@ -4472,6 +4532,10 @@ function renderLightDetail(){
     document.getElementById('ld-power').textContent = live.power.toFixed(1) + ' W';
     document.getElementById('ld-pf').textContent = live.pf.toFixed(2);
     document.getElementById('ld-frequency').textContent = live.freq ? live.freq.toFixed(1) + ' Hz' : '—';
+    document.getElementById('ld-energy-today').textContent = (live.kwhToday ?? 0).toFixed(3) + ' kWh';
+    const baseline = LIGHT_DAILY_BASELINE[node.id];
+    const sinceEl = document.getElementById('ld-energy-since');
+    if(sinceEl) sinceEl.textContent = baseline ? 'since ' + formatIstTime(baseline.ts) + ' IST' : 'since 12:00 AM';
     document.getElementById('ld-energy').textContent = live.kwh.toFixed(3) + ' kWh';
 
     if(live.reasons && live.reasons.length){
@@ -4490,7 +4554,8 @@ function renderLightDetail(){
     document.getElementById('ld-power').textContent = '—';
     document.getElementById('ld-pf').textContent = '—';
     document.getElementById('ld-frequency').textContent = '—';
-    document.getElementById('ld-energy').textContent = 'No live data yet';
+    document.getElementById('ld-energy-today').textContent = 'No live data yet';
+    document.getElementById('ld-energy').textContent = '—';
     reasonRow.style.display = 'none';
   }
 }
