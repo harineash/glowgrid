@@ -14,10 +14,38 @@ CREATE TABLE IF NOT EXISTS lights (
   current       DOUBLE PRECISION,
   power         DOUBLE PRECISION,
   power_factor  DOUBLE PRECISION,
+  frequency     DOUBLE PRECISION,
   energy_kwh    DOUBLE PRECISION NOT NULL DEFAULT 0,
+  daily_baseline_kwh DOUBLE PRECISION,           -- energy_kwh snapshot at the start of "today" (IST)
+  baseline_date DATE,                            -- which IST calendar date that snapshot belongs to
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
   created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Migration for existing deployments: adds the frequency column if the
+-- table was created before it existed. Safe to re-run — no-ops if the
+-- column is already there.
+ALTER TABLE lights ADD COLUMN IF NOT EXISTS frequency DOUBLE PRECISION;
+
+-- Migration for existing deployments: server-persisted daily energy
+-- tracking (see api/lights/[id].js PATCH), so "Energy Today" is correct
+-- on reload / on any device, not just whichever browser tab has been
+-- open since midnight. Safe to re-run.
+ALTER TABLE lights ADD COLUMN IF NOT EXISTS daily_baseline_kwh DOUBLE PRECISION;
+ALTER TABLE lights ADD COLUMN IF NOT EXISTS baseline_date DATE;
+
+-- Migration for existing deployments: on-device AI diagnostics fields.
+-- The real ESP32/PZEM firmware publishes its own ML classification per
+-- reading (status: NORMAL/DEGRADED/FAULT, confidence %, health score
+-- 0-100, remaining-useful-life in days, and radio signal strength) on
+-- topic "streetlights/data" instead of the dashboard computing status
+-- client-side. These columns persist that so it's available on reload
+-- and from any device. Safe to re-run.
+ALTER TABLE lights ADD COLUMN IF NOT EXISTS ai_status  TEXT;             -- raw device value: 'NORMAL' | 'DEGRADED' | 'FAULT'
+ALTER TABLE lights ADD COLUMN IF NOT EXISTS confidence DOUBLE PRECISION; -- 0-100 (%)
+ALTER TABLE lights ADD COLUMN IF NOT EXISTS health     DOUBLE PRECISION; -- 0-100 (%)
+ALTER TABLE lights ADD COLUMN IF NOT EXISTS rul_days   DOUBLE PRECISION; -- estimated remaining useful life, in days
+ALTER TABLE lights ADD COLUMN IF NOT EXISTS rssi       DOUBLE PRECISION; -- radio signal strength, dBm (negative)
 
 -- Keep updated_at accurate even on plain UPDATEs that forget to set it
 CREATE OR REPLACE FUNCTION touch_updated_at() RETURNS trigger AS $$
