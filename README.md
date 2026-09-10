@@ -98,8 +98,36 @@ reading and writing lights through the database.
 - **Live MQTT telemetry** — the dashboard itself connects directly to
   `broker.hivemq.com` from the browser (MQTT-over-WebSockets) and, for every
   reading it receives, calls `PATCH /api/lights/:id` to persist the latest
-  voltage/current/power/PF and add the incremental energy (kWh) onto that
-  light's running total.
+  voltage/current/power/PF, the on-device AI diagnostics (see below), and
+  add the incremental energy (kWh) onto that light's running total.
+
+## MQTT payload (topic `streetlights/data`)
+
+The ESP32/PZEM-004T firmware runs its own on-device ML classifier and
+publishes the verdict directly — the dashboard trusts it rather than
+re-deriving status client-side:
+
+```json
+{
+  "SL-01": {
+    "voltage": 230.0, "current": 0.240, "power": 55.2, "pf": 0.98,
+    "status": "NORMAL", "confidence": 98.9, "health": 98,
+    "rul_days": 365, "rssi": -26
+  },
+  "SL-02": { "...": "one entry per light, same shape" }
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `status` | `NORMAL` \| `DEGRADED` \| `FAULT` — mapped to `online` \| `dim` \| `fault` |
+| `confidence` | Model confidence, 0-100 (%) |
+| `health` | Health score, 0-100 (%) |
+| `rul_days` | Estimated remaining useful life, in days |
+| `rssi` | WiFi signal strength, dBm |
+
+Firmware that doesn't send `status` yet still works — the dashboard falls
+back to its built-in voltage/current threshold classifier in that case.
 
 **Note on telemetry persistence:** because the MQTT subscription lives in
 the browser tab (serverless functions can't hold a persistent MQTT
@@ -118,7 +146,7 @@ to help build that if you need it.
 | GET    | `/api/lights`       | —                                                                    | Returns all lights as an array |
 | POST   | `/api/lights`       | `{ id, s, z, lat, lon, type?, notes? }`                              | Creates or upserts a light |
 | GET    | `/api/lights/:id`   | —                                                                    | One light |
-| PATCH  | `/api/lights/:id`   | `{ status?, zone?, lat?, lon?, type?, notes?, voltage?, current?, power?, pf?, energyDeltaKwh? }` | Partial update; `energyDeltaKwh` is **added** to the running total, not overwritten |
+| PATCH  | `/api/lights/:id`   | `{ status?, zone?, lat?, lon?, type?, notes?, voltage?, current?, power?, pf?, energyDeltaKwh?, aiStatus?, confidence?, health?, rulDays?, rssi? }` | Partial update; `energyDeltaKwh` is **added** to the running total, not overwritten. `aiStatus`/`confidence`/`health`/`rulDays`/`rssi` are the on-device AI diagnostics fields |
 | DELETE | `/api/lights/:id`   | —                                                                    | Removes a light |
 
 All responses are JSON. Errors come back as `{ "error": "..." }` with a

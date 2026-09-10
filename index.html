@@ -1457,6 +1457,27 @@ function logoutApp(){
             <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;">METER TOTAL (LIFETIME)</span>
             <span style="font-family:'Orbitron',monospace;font-size:13px;font-weight:700;color:var(--cyan);" id="ld-energy">—</span>
           </div>
+          <div style="background:rgba(162,89,255,0.05);border:1px solid rgba(162,89,255,0.18);border-radius:10px;padding:12px;grid-column:1 / -1;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;">AI DIAGNOSTICS (ON-DEVICE MODEL)</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;">
+              <div>
+                <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--muted);">HEALTH</div>
+                <div style="font-family:'Orbitron',monospace;font-size:14px;font-weight:700;color:var(--purple);" id="ld-health">—</div>
+              </div>
+              <div>
+                <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--muted);">RUL</div>
+                <div style="font-family:'Orbitron',monospace;font-size:14px;font-weight:700;color:var(--purple);" id="ld-rul">—</div>
+              </div>
+              <div>
+                <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--muted);">CONFIDENCE</div>
+                <div style="font-family:'Orbitron',monospace;font-size:14px;font-weight:700;color:var(--purple);" id="ld-confidence">—</div>
+              </div>
+              <div>
+                <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:var(--muted);">SIGNAL</div>
+                <div style="font-family:'Orbitron',monospace;font-size:14px;font-weight:700;color:var(--purple);" id="ld-rssi">—</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div id="ld-reason-row" style="display:none;align-items:center;gap:8px;font-family:'Share Tech Mono',monospace;font-size:11px;padding:9px 12px;border-radius:8px;margin-bottom:16px;">
@@ -1700,12 +1721,8 @@ function logoutApp(){
       <div style="font-size:14px;font-weight:700;margin-bottom:14px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Lights Likely to Fail — Next 7 Days</div>
       <table class="tbl">
         <thead><tr><th>Light ID</th><th>Zone</th><th>Predicted Fault</th><th>Confidence</th><th>Days Left</th><th>Action</th></tr></thead>
-        <tbody>
-          <tr><td><span style="font-family:'Share Tech Mono',monospace;color:var(--cyan);">SL-02</span></td><td>Zone B</td><td><span class="badge red">Lamp Failure</span></td><td><div class="pbar" style="width:80px"><div class="pbar-fill red" style="width:91%;"></div></div><span style="font-size:11px;font-family:'Share Tech Mono',monospace;color:var(--red);margin-left:5px;">91%</span></td><td><span style="color:var(--red);font-weight:700;font-family:'Share Tech Mono',monospace;">~2d</span></td><td><button class="btn sm warn">Schedule</button></td></tr>
-          <tr><td><span style="font-family:'Share Tech Mono',monospace;color:var(--cyan);">SL-05</span></td><td>Zone E</td><td><span class="badge amber">Driver Fault</span></td><td><div class="pbar" style="width:80px"><div class="pbar-fill amber" style="width:84%;"></div></div><span style="font-size:11px;font-family:'Share Tech Mono',monospace;color:var(--amber);margin-left:5px;">84%</span></td><td><span style="color:var(--amber);font-weight:700;font-family:'Share Tech Mono',monospace;">~4d</span></td><td><button class="btn sm warn">Schedule</button></td></tr>
-          <tr><td><span style="font-family:'Share Tech Mono',monospace;color:var(--cyan);">SL-08</span></td><td>Zone A</td><td><span class="badge red">Overtemp</span></td><td><div class="pbar" style="width:80px"><div class="pbar-fill red" style="width:78%;"></div></div><span style="font-size:11px;font-family:'Share Tech Mono',monospace;color:var(--red);margin-left:5px;">78%</span></td><td><span style="color:var(--red);font-weight:700;font-family:'Share Tech Mono',monospace;">~5d</span></td><td><button class="btn sm warn">Schedule</button></td></tr>
-          <tr><td><span style="font-family:'Share Tech Mono',monospace;color:var(--cyan);">SL-07</span></td><td>Zone D</td><td><span class="badge amber">Comm Fault</span></td><td><div class="pbar" style="width:80px"><div class="pbar-fill amber" style="width:72%;"></div></div><span style="font-size:11px;font-family:'Share Tech Mono',monospace;color:var(--amber);margin-left:5px;">72%</span></td><td><span style="color:var(--amber);font-weight:700;font-family:'Share Tech Mono',monospace;">~6d</span></td><td><button class="btn sm warn">Schedule</button></td></tr>
-          <tr><td><span style="font-family:'Share Tech Mono',monospace;color:var(--cyan);">SL-10</span></td><td>Zone E</td><td><span class="badge amber">Low Voltage</span></td><td><div class="pbar" style="width:80px"><div class="pbar-fill amber" style="width:68%;"></div></div><span style="font-size:11px;font-family:'Share Tech Mono',monospace;color:var(--amber);margin-left:5px;">68%</span></td><td><span style="color:var(--amber);font-weight:700;font-family:'Share Tech Mono',monospace;">~7d</span></td><td><button class="btn sm warn">Schedule</button></td></tr>
+        <tbody id="predict-fault-table-body">
+          <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:12px;">Waiting for live AI telemetry over MQTT…</td></tr>
         </tbody>
       </table>
     </div>
@@ -3041,7 +3058,19 @@ function zoneColor(z){ return ZONE_COLORS[z] || '#00e5ff'; }
 // public broker over MQTT. Browsers can't speak raw MQTT/TCP, so we
 // connect over MQTT-over-WebSockets (HiveMQ exposes this on 8884/wss)
 // using the mqtt.js browser bundle loaded above.
-//   Topic "streetlights/data"   → JSON: {"SL-01":{voltage,current,power,pf,status}, ...}
+//   Topic "streetlights/data"   → JSON, one entry per light, published by
+//                                  the ESP32/PZEM-004T firmware which runs
+//                                  its OWN on-device ML classifier and
+//                                  reports the verdict directly:
+//                                    {"SL-01":{"voltage":230.0,"current":0.240,
+//                                      "power":55.2,"pf":0.98,"status":"NORMAL",
+//                                      "confidence":98.9,"health":98,
+//                                      "rul_days":365,"rssi":-26}, "SL-02": {...}}
+//                                  status is one of NORMAL | DEGRADED | FAULT
+//                                  (mapped below to online | dim | fault).
+//                                  confidence/health are 0-100 (%), rul_days
+//                                  is estimated remaining useful life in days,
+//                                  rssi is WiFi signal strength in dBm.
 //                                  (optional extra fields "freq"/"frequency" and
 //                                  "energy" are read automatically if your firmware
 //                                  sends them — safely ignored otherwise)
@@ -3236,6 +3265,21 @@ function classifyLightReading(id, reading){
   return result;
 }
 window.classifyLightReading = classifyLightReading;
+
+// Maps the device's own AI verdict (sent in every MQTT reading) onto the
+// dashboard's 3-class status. Used INSTEAD of classifyByThreshold() when
+// the firmware reports "status" — the ESP32/PZEM node already runs its
+// own trained model, so the dashboard just displays its answer rather
+// than re-deriving one client-side. Older firmware that doesn't send
+// "status" still falls back to classifyLightReading() above.
+function mapDeviceAiStatus(rawStatus){
+  const s = String(rawStatus || '').trim().toUpperCase();
+  if(s === 'NORMAL') return 'online';
+  if(s === 'DEGRADED') return 'dim';
+  if(s === 'FAULT') return 'fault';
+  return null; // unrecognized — caller should fall back to threshold classifier
+}
+window.mapDeviceAiStatus = mapDeviceAiStatus;
 
 function setMqttStatusBadge(state){
   // state: 'connecting' | 'connected' | 'disconnected' | 'error'
@@ -3552,6 +3596,20 @@ function applyLiveTelemetry(data){
     // so older payloads without it can't get misread as "0 Hz = fault".
     const hasFreq = reading.freq !== undefined || reading.frequency !== undefined || reading.f !== undefined;
     const freq = hasFreq ? (Number(reading.freq ?? reading.frequency ?? reading.f) || 0) : 0;
+
+    // On-device AI diagnostics — present on the real firmware payload.
+    // Any/all of these can be absent on older firmware; each is only
+    // stored/sent onward when actually provided.
+    const hasConfidence = reading.confidence !== undefined;
+    const confidence = hasConfidence ? Number(reading.confidence) : null;
+    const hasHealth = reading.health !== undefined;
+    const health = hasHealth ? Number(reading.health) : null;
+    const hasRulDays = reading.rul_days !== undefined || reading.rulDays !== undefined;
+    const rulDays = hasRulDays ? Number(reading.rul_days ?? reading.rulDays) : null;
+    const hasRssi = reading.rssi !== undefined;
+    const rssi = hasRssi ? Number(reading.rssi) : null;
+    const rawAiStatus = typeof reading.status === 'string' ? reading.status.trim().toUpperCase() : null;
+
     const now = Date.now();
 
     // Riemann-sum energy accumulation (kWh) since the last reading for
@@ -3582,9 +3640,29 @@ function applyLiveTelemetry(data){
     }
     const kwhToday = Math.max(0, kwh - baseline.startKwh);
 
-    const { status: newStatus, reasons } = classifyLightReading(id, { voltage, current, power, pf, freq, hasFreq });
+    // Prefer the device's own AI verdict when the payload includes one
+    // (real hardware always does — see MQTT_DATA_TOPIC comment above).
+    // Fall back to the client-side threshold engine only for firmware
+    // that doesn't report "status" yet, so nothing breaks either way.
+    const mappedAiStatus = mapDeviceAiStatus(rawAiStatus);
+    let newStatus, reasons;
+    if(mappedAiStatus){
+      newStatus = mappedAiStatus;
+      reasons = mappedAiStatus === 'online' ? [] : [
+        `AI classified ${rawAiStatus}` +
+        (hasConfidence ? ` (${confidence.toFixed(1)}% confidence)` : '') +
+        (hasHealth ? ` · health ${health.toFixed(0)}%` : '') +
+        (hasRulDays ? ` · ~${rulDays.toFixed(0)}d remaining` : '')
+      ];
+      pushLightHistory(id, { voltage, current, power, pf, freq, hasFreq });
+    } else {
+      ({ status: newStatus, reasons } = classifyLightReading(id, { voltage, current, power, pf, freq, hasFreq }));
+    }
 
-    LIGHT_LIVE_DATA[id] = { voltage, current, power, pf, freq: hasFreq ? freq : null, kwh, kwhToday, reasons, ts: now };
+    LIGHT_LIVE_DATA[id] = {
+      voltage, current, power, pf, freq: hasFreq ? freq : null, kwh, kwhToday, reasons, ts: now,
+      aiStatus: rawAiStatus, confidence, health, rulDays, rssi,
+    };
 
     const node = LIGHT_NODES.find(n => n.id === id);
     if(!node) return; // telemetry for a light not currently on the map — ignore
@@ -3609,9 +3687,18 @@ function applyLiveTelemetry(data){
 
     // Persist this reading to the backend DB if one is available (fire
     // and forget — never blocks the UI, and patchLightTelemetryToApi()
-    // itself no-ops when no backend has been detected).
+    // itself no-ops when no backend has been detected). frequency is only
+    // included when the firmware actually reported it, matching how the
+    // backend's COALESCE-based update treats a missing field as "no change."
     const energyDeltaKwh = prev && prev.ts && !hasReportedEnergy ? kwh - prev.kwh : 0;
-    patchLightTelemetryToApi(id, { status: newStatus, voltage, current, power, pf, energyDeltaKwh });
+    patchLightTelemetryToApi(id, {
+      status: newStatus, voltage, current, power, pf, frequency: hasFreq ? freq : undefined, energyDeltaKwh,
+      aiStatus: rawAiStatus || undefined,
+      confidence: hasConfidence ? confidence : undefined,
+      health: hasHealth ? health : undefined,
+      rulDays: hasRulDays ? rulDays : undefined,
+      rssi: hasRssi ? rssi : undefined,
+    });
   });
 
   if(anyStatusChanged){
@@ -3623,6 +3710,11 @@ function applyLiveTelemetry(data){
       renderManageLightsList();
     }
   }
+
+  // Confidence/health/RUL can tick over even when status doesn't change,
+  // so refresh the Predictive Analytics "at risk" table on every reading,
+  // not just on a status flip.
+  renderPredictiveTable();
 }
 
 // Pushes a status change for one node out to the Grid map and Live map
@@ -3705,6 +3797,48 @@ function renderFaultTable(){
   }).join('');
 }
 
+// Rebuilds the "Lights Likely to Fail" table on the Predictive Analytics
+// page from real AI telemetry (health/confidence/rul_days reported by the
+// ESP32/PZEM firmware itself on every MQTT reading) — replacing the
+// static demo rows the moment live data starts arriving.
+function renderPredictiveTable(){
+  const tbody = document.getElementById('predict-fault-table-body');
+  if(!tbody) return; // page not in the DOM yet
+
+  const atRisk = LIGHT_NODES
+    .map(n => ({ node: n, live: LIGHT_LIVE_DATA[n.id] }))
+    .filter(({ live }) => live && live.aiStatus && live.aiStatus !== 'NORMAL')
+    .sort((a, b) => {
+      const ra = a.live.rulDays ?? Infinity, rb = b.live.rulDays ?? Infinity;
+      if(ra !== rb) return ra - rb;
+      return (b.live.confidence ?? 0) - (a.live.confidence ?? 0);
+    })
+    .slice(0, 8);
+
+  if(!atRisk.length){
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:12px;">✅ No degraded or at-risk lights currently reported by the AI model.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = atRisk.map(({ node, live }) => {
+    const isFault = live.aiStatus === 'FAULT';
+    const badgeClass = isFault ? 'red' : 'amber';
+    const barClass = isFault ? 'red' : 'amber';
+    const faultLabel = isFault ? 'Lamp Failure' : 'Degrading Output';
+    const conf = live.confidence != null ? live.confidence : 0;
+    const daysLeft = live.rulDays != null ? (live.rulDays <= 0 ? '<1d' : '~' + Math.round(live.rulDays) + 'd') : '—';
+    return `<tr>
+      <td><span style="font-family:'Share Tech Mono',monospace;color:var(--cyan);">${node.id}</span></td>
+      <td>Zone ${node.z}</td>
+      <td><span class="badge ${badgeClass}">${faultLabel}</span></td>
+      <td><div class="pbar" style="width:80px"><div class="pbar-fill ${barClass}" style="width:${conf}%;"></div></div><span style="font-size:11px;font-family:'Share Tech Mono',monospace;color:var(--${isFault ? 'red' : 'amber'});margin-left:5px;">${conf.toFixed(1)}%</span></td>
+      <td><span style="color:var(--${isFault ? 'red' : 'amber'});font-weight:700;font-family:'Share Tech Mono',monospace;">${daysLeft}</span></td>
+      <td><div class="contact-actions"><button class="btn sm warn" onclick="assignTech('${node.id}')">Schedule</button></div></td>
+    </tr>`;
+  }).join('');
+}
+window.renderPredictiveTable = renderPredictiveTable;
+
 // Classifies a faulty light's priority for the Technician View, combining
 // how dangerous the fault reason is with how long it's gone unresolved —
 // a hazard is always HIGH; a simple "lamp off" fault escalates from LOW
@@ -3712,7 +3846,12 @@ function renderFaultTable(){
 function getFaultPriority(node){
   const live = LIGHT_LIVE_DATA[node.id];
   const reasonText = ((live && live.reasons) || []).join(' ');
-  const isHazard = /severe voltage|frequency abnormality|overcurrent/i.test(reasonText);
+  // A hazard is either a severe electrical abnormality (threshold engine)
+  // OR the on-device AI model itself reporting near-zero health / RUL —
+  // both mean "act now", not "wait and see".
+  const isHazard = /severe voltage|frequency abnormality|overcurrent/i.test(reasonText)
+    || (live && live.health != null && live.health <= 10)
+    || (live && live.rulDays != null && live.rulDays <= 1);
   const since = LIGHT_FAULT_SINCE[node.id];
   const minutesFaulty = since ? (Date.now() - since) / 60000 : 0;
 
@@ -4537,6 +4676,10 @@ function renderLightDetail(){
     const sinceEl = document.getElementById('ld-energy-since');
     if(sinceEl) sinceEl.textContent = baseline ? 'since ' + formatIstTime(baseline.ts) + ' IST' : 'since 12:00 AM';
     document.getElementById('ld-energy').textContent = live.kwh.toFixed(3) + ' kWh';
+    document.getElementById('ld-health').textContent = live.health != null ? live.health.toFixed(0) + '%' : '—';
+    document.getElementById('ld-rul').textContent = live.rulDays != null ? (live.rulDays <= 0 ? '<1d' : Math.round(live.rulDays) + 'd') : '—';
+    document.getElementById('ld-confidence').textContent = live.confidence != null ? live.confidence.toFixed(1) + '%' : '—';
+    document.getElementById('ld-rssi').textContent = live.rssi != null ? live.rssi + ' dBm' : '—';
 
     if(live.reasons && live.reasons.length){
       reasonRow.style.display = 'flex';
@@ -4556,6 +4699,10 @@ function renderLightDetail(){
     document.getElementById('ld-frequency').textContent = '—';
     document.getElementById('ld-energy-today').textContent = 'No live data yet';
     document.getElementById('ld-energy').textContent = '—';
+    document.getElementById('ld-health').textContent = '—';
+    document.getElementById('ld-rul').textContent = '—';
+    document.getElementById('ld-confidence').textContent = '—';
+    document.getElementById('ld-rssi').textContent = '—';
     reasonRow.style.display = 'none';
   }
 }
@@ -4751,7 +4898,34 @@ async function loadLightsFromApi(){
     const data = await res.json();
     if(!Array.isArray(data) || !data.length) return false;
     LIGHT_NODES.length = 0;
-    data.forEach(n => LIGHT_NODES.push(n));
+    data.forEach(n => {
+      // The API nests last-known telemetry under n.live — apply it to
+      // LIGHT_LIVE_DATA (where the rest of the dashboard actually reads
+      // from) so a page reload shows the database's stored readings
+      // immediately, instead of "No live data yet" until the next MQTT
+      // message. LIGHT_NODES itself stays in its plain {id,s,z,lat,lon,...}
+      // shape, matching every other code path that reads it.
+      if(n.live){
+        LIGHT_LIVE_DATA[n.id] = {
+          voltage: n.live.voltage, current: n.live.current, power: n.live.power,
+          pf: n.live.pf, freq: n.live.freq ?? null, kwh: n.live.kwh, kwhToday: n.live.kwhToday ?? 0,
+          reasons: [], ts: n.live.ts ? new Date(n.live.ts).getTime() : Date.now(),
+          aiStatus: n.live.aiStatus ?? null, confidence: n.live.confidence ?? null,
+          health: n.live.health ?? null, rulDays: n.live.rulDays ?? null, rssi: n.live.rssi ?? null,
+        };
+        // Reconstruct the equivalent client-side baseline so the NEXT
+        // MQTT tick continues today's count from where the server left
+        // off, instead of treating it as a fresh baseline and wiping
+        // the just-loaded kwhToday back to 0.
+        LIGHT_DAILY_BASELINE[n.id] = {
+          date: getIstDateString(Date.now()),
+          startKwh: n.live.kwh - (n.live.kwhToday ?? 0),
+          ts: n.live.ts ? new Date(n.live.ts).getTime() : Date.now(),
+        };
+      }
+      const { live, ...node } = n;
+      LIGHT_NODES.push(node);
+    });
     apiBackendAvailable = true;
     return true;
   } catch(e){
@@ -4809,6 +4983,7 @@ window.attachMnodeTooltip = attachMnodeTooltip;
   renderFaultTable();
   renderLiveAlerts();
   renderTechDashboard();
+  renderPredictiveTable();
   recalcAndRenderKpis();
   initMqttLive();
 })();
