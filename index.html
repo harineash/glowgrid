@@ -1651,141 +1651,110 @@ function logoutApp(){
   <div class="page-header">
     <div>
       <div class="page-title">PREDICTIVE ANALYTICS (AI/ML)</div>
-      <div class="page-sub">FAILURE PREDICTIONS · TREND GRAPHS · HIGH-RISK ZONES</div>
+      <div class="page-sub">REAL-TIME FAILURE RISK · 5-FEATURE MODEL INPUTS · LIVE GATEWAY TINYML</div>
     </div>
-    <div style="display:flex;gap:8px;">
-      <span class="badge purple"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg> LightNet v2.3 Active</span>
-      <button class="btn primary">Run Model</button>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <span class="badge purple" id="predict-model-badge">REAL-TIME PREDICTOR</span>
+      <span class="badge cyan" id="predict-last-run">Waiting for telemetry</span>
+      <button class="btn primary" id="predict-run-btn" onclick="runPredictiveModel()">Run Model</button>
     </div>
   </div>
 
   <div class="grid4" style="margin-bottom:16px;">
-    <div class="card" style="padding:14px;"><div class="card-accent red"></div>
-      <div style="font-size:20px;margin-bottom:6px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
-      <div class="kpi-num" style="color:var(--red);font-size:22px;">18</div>
-      <div class="kpi-lbl">At Risk (7 days)</div>
+    <div class="card" style="padding:14px;">
+      <div class="card-accent red"></div>
+      <div class="kpi-num" id="pred-at-risk-7" style="color:var(--red);font-size:22px;">0</div>
+      <div class="kpi-lbl">High Risk · 7 Days</div>
+      <div class="kpi-delta" id="pred-risk-7-sub">Waiting for live data</div>
     </div>
-    <div class="card" style="padding:14px;"><div class="card-accent amber"></div>
-      <div style="font-size:20px;margin-bottom:6px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-      <div class="kpi-num" style="color:var(--amber);font-size:22px;">34</div>
-      <div class="kpi-lbl">At Risk (30 days)</div>
+    <div class="card" style="padding:14px;">
+      <div class="card-accent amber"></div>
+      <div class="kpi-num" id="pred-at-risk-30" style="color:var(--amber);font-size:22px;">0</div>
+      <div class="kpi-lbl">Watch · 30 Days</div>
+      <div class="kpi-delta" id="pred-risk-30-sub">Waiting for live data</div>
     </div>
-    <div class="card" style="padding:14px;"><div class="card-accent purple"></div>
-      <div style="font-size:20px;margin-bottom:6px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
-      <div class="kpi-num" style="color:var(--purple);font-size:22px;">94%</div>
-      <div class="kpi-lbl">Model Accuracy</div>
+    <div class="card" style="padding:14px;">
+      <div class="card-accent purple"></div>
+      <div class="kpi-num" id="pred-avg-risk" style="color:var(--purple);font-size:22px;">—%</div>
+      <div class="kpi-lbl">Average Failure Risk</div>
+      <div class="kpi-delta" id="pred-avg-risk-sub">Per live node</div>
     </div>
-    <div class="card" style="padding:14px;"><div class="card-accent green"></div>
-      <div style="font-size:20px;margin-bottom:6px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></div>
-      <div class="kpi-num" style="color:var(--green);font-size:22px;">₹42K</div>
-      <div class="kpi-lbl">Saved by Prevention</div>
+    <div class="card" style="padding:14px;">
+      <div class="card-accent green"></div>
+      <div class="kpi-num" id="pred-live-nodes" style="color:var(--green);font-size:22px;">0</div>
+      <div class="kpi-lbl">Live AI Inputs</div>
+      <div class="kpi-delta" id="pred-live-nodes-sub">V · I · P · Prev P · Hours</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-accent cyan"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+      <div style="font-size:14px;font-weight:700;">Live Predictive AI — Streetlight Risk</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--muted);">
+        5 FEATURES: VOLTAGE · CURRENT · POWER · PREVIOUS POWER · OPERATING HOURS
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="tbl" id="predictive-live-table">
+        <thead>
+          <tr>
+            <th>Light</th><th>Zone</th><th>Voltage</th><th>Current</th><th>Power</th>
+            <th>Prev Power</th><th>Operating Hours</th><th>PF</th><th>Freq</th>
+            <th>Gateway ML</th><th>Confidence</th><th>Risk</th><th>Prediction</th><th>ETA</th>
+          </tr>
+        </thead>
+        <tbody id="predictive-live-body">
+          <tr><td colspan="14" style="text-align:center;padding:28px;color:var(--muted);font-family:'Share Tech Mono',monospace;">
+            Waiting for live MQTT telemetry…
+          </td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
   <div class="pred-grid">
-    <!-- At-risk lights -->
-    <div class="card">
-      <div class="card-accent red"></div>
-      <div style="font-size:14px;font-weight:700;margin-bottom:14px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Lights Likely to Fail — Next 7 Days</div>
-      <table class="tbl">
-        <thead><tr><th>Light ID</th><th>Zone</th><th>Predicted Fault</th><th>Confidence</th><th>Days Left</th><th>Action</th></tr></thead>
-        <tbody>
-          <tr><td><span style="font-family:'Share Tech Mono',monospace;color:var(--cyan);">SL-02</span></td><td>Zone B</td><td><span class="badge red">Lamp Failure</span></td><td><div class="pbar" style="width:80px"><div class="pbar-fill red" style="width:91%;"></div></div><span style="font-size:11px;font-family:'Share Tech Mono',monospace;color:var(--red);margin-left:5px;">91%</span></td><td><span style="color:var(--red);font-weight:700;font-family:'Share Tech Mono',monospace;">~2d</span></td><td><button class="btn sm warn">Schedule</button></td></tr>
-          <tr><td><span style="font-family:'Share Tech Mono',monospace;color:var(--cyan);">SL-05</span></td><td>Zone E</td><td><span class="badge amber">Driver Fault</span></td><td><div class="pbar" style="width:80px"><div class="pbar-fill amber" style="width:84%;"></div></div><span style="font-size:11px;font-family:'Share Tech Mono',monospace;color:var(--amber);margin-left:5px;">84%</span></td><td><span style="color:var(--amber);font-weight:700;font-family:'Share Tech Mono',monospace;">~4d</span></td><td><button class="btn sm warn">Schedule</button></td></tr>
-          <tr><td><span style="font-family:'Share Tech Mono',monospace;color:var(--cyan);">SL-08</span></td><td>Zone A</td><td><span class="badge red">Overtemp</span></td><td><div class="pbar" style="width:80px"><div class="pbar-fill red" style="width:78%;"></div></div><span style="font-size:11px;font-family:'Share Tech Mono',monospace;color:var(--red);margin-left:5px;">78%</span></td><td><span style="color:var(--red);font-weight:700;font-family:'Share Tech Mono',monospace;">~5d</span></td><td><button class="btn sm warn">Schedule</button></td></tr>
-          <tr><td><span style="font-family:'Share Tech Mono',monospace;color:var(--cyan);">SL-07</span></td><td>Zone D</td><td><span class="badge amber">Comm Fault</span></td><td><div class="pbar" style="width:80px"><div class="pbar-fill amber" style="width:72%;"></div></div><span style="font-size:11px;font-family:'Share Tech Mono',monospace;color:var(--amber);margin-left:5px;">72%</span></td><td><span style="color:var(--amber);font-weight:700;font-family:'Share Tech Mono',monospace;">~6d</span></td><td><button class="btn sm warn">Schedule</button></td></tr>
-          <tr><td><span style="font-family:'Share Tech Mono',monospace;color:var(--cyan);">SL-10</span></td><td>Zone E</td><td><span class="badge amber">Low Voltage</span></td><td><div class="pbar" style="width:80px"><div class="pbar-fill amber" style="width:68%;"></div></div><span style="font-size:11px;font-family:'Share Tech Mono',monospace;color:var(--amber);margin-left:5px;">68%</span></td><td><span style="color:var(--amber);font-weight:700;font-family:'Share Tech Mono',monospace;">~7d</span></td><td><button class="btn sm warn">Schedule</button></td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Trend graph -->
     <div class="card">
       <div class="card-accent purple"></div>
-      <div style="font-size:14px;font-weight:700;margin-bottom:14px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> Monthly Failure Trend</div>
-      <svg viewBox="0 0 300 150" style="width:100%;overflow:visible;" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#a259ff" stop-opacity="0.25"/>
-            <stop offset="100%" stop-color="#a259ff" stop-opacity="0"/>
-          </linearGradient>
-          <linearGradient id="trendFill2" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#00d2ff" stop-opacity="0.2"/>
-            <stop offset="100%" stop-color="#00d2ff" stop-opacity="0"/>
-          </linearGradient>
-        </defs>
-        <!-- Grid -->
-        <line x1="30" y1="10" x2="30" y2="130" stroke="rgba(0,210,255,0.1)" stroke-width="1"/>
-        <line x1="30" y1="130" x2="295" y2="130" stroke="rgba(0,210,255,0.1)" stroke-width="1"/>
-        <line x1="30" y1="90" x2="295" y2="90" stroke="rgba(0,210,255,0.05)" stroke-width="1" stroke-dasharray="4,4"/>
-        <line x1="30" y1="60" x2="295" y2="60" stroke="rgba(0,210,255,0.05)" stroke-width="1" stroke-dasharray="4,4"/>
-        <!-- Actual faults area -->
-        <path d="M30,100 L68,95 L106,80 L144,88 L182,72 L220,65 L258,55 L296,50 L296,130 L30,130 Z" fill="url(#trendFill)"/>
-        <path d="M30,100 L68,95 L106,80 L144,88 L182,72 L220,65 L258,55 L296,50" fill="none" stroke="#a259ff" stroke-width="2" stroke-linejoin="round"/>
-        <!-- Predicted area -->
-        <path d="M30,110 L68,102 L106,95 L144,98 L182,88 L220,80 L258,72 L296,66 L296,130 L30,130 Z" fill="url(#trendFill2)"/>
-        <path d="M30,110 L68,102 L106,95 L144,98 L182,88 L220,80 L258,72 L296,66" fill="none" stroke="#00d2ff" stroke-width="1.5" stroke-dasharray="5,3"/>
-        <!-- X labels -->
-        <text x="25" y="144" fill="#3a6080" font-size="8" font-family="'Share Tech Mono',monospace">Sep</text>
-        <text x="62" y="144" fill="#3a6080" font-size="8" font-family="'Share Tech Mono',monospace">Oct</text>
-        <text x="100" y="144" fill="#3a6080" font-size="8" font-family="'Share Tech Mono',monospace">Nov</text>
-        <text x="138" y="144" fill="#3a6080" font-size="8" font-family="'Share Tech Mono',monospace">Dec</text>
-        <text x="176" y="144" fill="#3a6080" font-size="8" font-family="'Share Tech Mono',monospace">Jan</text>
-        <text x="214" y="144" fill="#3a6080" font-size="8" font-family="'Share Tech Mono',monospace">Feb</text>
-        <text x="252" y="144" fill="#3a6080" font-size="8" font-family="'Share Tech Mono',monospace">Mar</text>
-        <text x="284" y="144" fill="#00d2ff" font-size="8" font-family="'Share Tech Mono',monospace">Apr↗</text>
-        <!-- Legend -->
-        <circle cx="35" cy="155" r="4" fill="#a259ff"/>
-        <text x="43" y="158" fill="#6a9ab8" font-size="8" font-family="'Share Tech Mono',monospace">Actual faults</text>
-        <line x1="118" y1="155" x2="130" y2="155" stroke="#00d2ff" stroke-width="1.5" stroke-dasharray="3,2"/>
-        <text x="134" y="158" fill="#6a9ab8" font-size="8" font-family="'Share Tech Mono',monospace">AI forecast</text>
-      </svg>
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Feature Health & Model Explanation</div>
+      <div id="predict-feature-panel" style="display:flex;flex-direction:column;gap:8px;">
+        <div style="color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:11px;">
+          Select a live light from the table to inspect its prediction inputs.
+        </div>
+      </div>
     </div>
 
-    <!-- High risk zone map -->
-    <div class="risk-map">
-      <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg> High-Risk Zones</div>
-      <svg viewBox="0 0 300 200" style="width:100%;display:block;" xmlns="http://www.w3.org/2000/svg">
-        <rect width="300" height="200" fill="#06101a"/>
-        <!-- Zone blobs -->
-        <ellipse cx="80" cy="80" rx="55" ry="45" fill="rgba(255,59,92,0.15)" stroke="rgba(255,59,92,0.4)" stroke-width="1.5" stroke-dasharray="4,3"/>
-        <text x="55" y="83" fill="#ff3b5c" font-size="9" font-family="'Share Tech Mono',monospace">ZONE D</text>
-        <text x="55" y="93" fill="rgba(255,59,92,0.7)" font-size="8" font-family="'Share Tech Mono',monospace">HIGH RISK</text>
-        <ellipse cx="210" cy="80" rx="50" ry="38" fill="rgba(255,179,0,0.10)" stroke="rgba(255,179,0,0.3)" stroke-width="1.5" stroke-dasharray="4,3"/>
-        <text x="185" y="83" fill="#ffb300" font-size="9" font-family="'Share Tech Mono',monospace">ZONE C</text>
-        <text x="185" y="93" fill="rgba(255,179,0,0.7)" font-size="8" font-family="'Share Tech Mono',monospace">MED RISK</text>
-        <ellipse cx="80" cy="160" rx="45" ry="30" fill="rgba(0,210,255,0.06)" stroke="rgba(0,210,255,0.15)" stroke-width="1"/>
-        <text x="57" y="163" fill="#3a6080" font-size="9" font-family="'Share Tech Mono',monospace">ZONE A</text>
-        <text x="57" y="173" fill="#3a6080" font-size="8" font-family="'Share Tech Mono',monospace">LOW RISK</text>
-        <ellipse cx="210" cy="155" rx="50" ry="32" fill="rgba(0,210,255,0.06)" stroke="rgba(0,210,255,0.15)" stroke-width="1"/>
-        <text x="186" y="158" fill="#3a6080" font-size="9" font-family="'Share Tech Mono',monospace">ZONE E/F</text>
-        <text x="186" y="168" fill="#3a6080" font-size="8" font-family="'Share Tech Mono',monospace">LOW RISK</text>
-        <!-- Fault dots -->
-        <circle cx="60" cy="70" r="4" fill="#ff3b5c" opacity="0.9"/><circle cx="90" cy="60" r="3" fill="#ff3b5c" opacity="0.7"/>
-        <circle cx="75" cy="90" r="4" fill="#ff3b5c" opacity="0.9"/><circle cx="100" cy="80" r="3" fill="#ff3b5c" opacity="0.6"/>
-        <circle cx="65" cy="95" r="3" fill="#ff3b5c" opacity="0.8"/>
-        <circle cx="200" cy="75" r="3" fill="#ffb300" opacity="0.8"/><circle cx="220" cy="88" r="3" fill="#ffb300" opacity="0.7"/>
-        <circle cx="195" cy="90" r="3" fill="#ffb300" opacity="0.6"/>
-      </svg>
+    <div class="card">
+      <div class="card-accent red"></div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Real-Time AI Recommendations</div>
+      <div id="predict-recommendations" style="display:flex;flex-direction:column;gap:9px;">
+        <div style="color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:11px;">
+          No live prediction yet.
+        </div>
+      </div>
     </div>
 
-    <!-- AI insights -->
     <div class="card">
       <div class="card-accent cyan"></div>
-      <div style="font-size:14px;font-weight:700;margin-bottom:14px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg> AI Recommendations</div>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <div style="background:rgba(255,59,92,0.07);border:1px solid rgba(255,59,92,0.2);border-radius:8px;padding:12px;">
-          <div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:4px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Immediate Action Required</div>
-          <div style="font-size:12px;color:var(--text2);line-height:1.5;">Replace lamp driver in Zone B (SL-02, Admin Block). Predicted failure within 48 hours with 91% confidence.</div>
-        </div>
-        <div style="background:rgba(255,179,0,0.07);border:1px solid rgba(255,179,0,0.2);border-radius:8px;padding:12px;">
-          <div style="font-size:12px;font-weight:700;color:var(--amber);margin-bottom:4px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> Preventive Maintenance</div>
-          <div style="font-size:12px;color:var(--text2);line-height:1.5;">Schedule heat-sink cleaning for SL-07 (Girls Hostel, Zone D). Overheating pattern detected in last 14 days.</div>
-        </div>
-        <div style="background:rgba(0,210,255,0.07);border:1px solid rgba(0,210,255,0.15);border-radius:8px;padding:12px;">
-          <div style="font-size:12px;font-weight:700;color:var(--cyan);margin-bottom:4px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2.05V17h6v-.25c0-.85.4-1.55 1-2.05A7 7 0 0 0 12 2z"/></svg> Efficiency Tip</div>
-          <div style="font-size:12px;color:var(--text2);line-height:1.5;">Reducing brightness by 10% on the Sports Ground &amp; Auditorium lights (Zones D/E) between 01:00–04:00 AM would save ₹820/month with no safety impact.</div>
-        </div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Prediction Logic</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2);line-height:1.7;">
+        <div>• Gateway TinyML class/confidence is preserved as the actual hardware inference.</div>
+        <div>• Browser predictor adds a live <b style="color:var(--cyan);">failure-risk score</b> from the same telemetry stream.</div>
+        <div>• Previous Power detects sudden power change.</div>
+        <div>• Operating Hours captures accumulated service age.</div>
+        <div>• Voltage, current, PF and frequency add electrical stress indicators.</div>
+        <div>• Repeated abnormal readings increase risk; healthy readings reduce it.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-accent green"></div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Model Status</div>
+      <div id="predict-status-panel" style="font-family:'Share Tech Mono',monospace;font-size:10px;line-height:1.8;color:var(--text2);">
+        <div>MQTT: <span id="pred-status-mqtt" style="color:var(--amber);">CONNECTING</span></div>
+        <div>Telemetry: <span id="pred-status-telemetry" style="color:var(--muted);">WAITING</span></div>
+        <div>Prediction: <span id="pred-status-engine" style="color:var(--green);">READY</span></div>
+        <div>Last update: <span id="pred-status-time">—</span></div>
       </div>
     </div>
   </div>
@@ -3082,7 +3051,282 @@ const MQTT_SILENCE_TOPIC = 'streetlights/silence';
 const LIGHT_SIREN_STATE = {};
 
 // Latest telemetry per light ID: { voltage, current, power, pf, freq, kwh, kwhToday, ts }
+
 const LIGHT_LIVE_DATA = {};
+
+// Real-time predictive state.
+// The gateway's TinyML remains the authoritative hardware classification.
+// These browser-side values provide the extra prediction horizon/risk layer.
+const PREDICTIVE_STATE = {};
+const LIGHT_OPERATING_MS = {};
+const LIGHT_FIRST_SEEN = {};
+const PREDICTIVE_HISTORY_MAX = 60;
+const PREDICTIVE_HISTORY = {};
+
+function predictSafeNum(v, fallback=0){
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function getPredictiveFeatures(id, live){
+  const history = PREDICTIVE_HISTORY[id] || [];
+  const prev = history.length ? history[history.length - 1] : null;
+  const previousPower = prev ? predictSafeNum(prev.power, live.power) : predictSafeNum(live.power);
+  let operatingHours = predictSafeNum(live.operatingHours, NaN);
+
+  // If the gateway does not transmit operatingHours, accumulate it locally
+  // from real telemetry arrival times. This never pretends that a new meter
+  // reading contains historical hours it did not actually send.
+  if(!Number.isFinite(operatingHours)){
+    operatingHours = predictSafeNum(LIGHT_OPERATING_MS[id], 0) / 3600000;
+  }
+
+  return {
+    voltage: predictSafeNum(live.voltage),
+    current: predictSafeNum(live.current),
+    power: predictSafeNum(live.power),
+    previousPower,
+    operatingHours,
+    frequency: predictSafeNum(live.freq, 0),
+    pf: predictSafeNum(live.pf, 0),
+    gatewayStatus: String(live.gatewayStatus || '').toUpperCase(),
+    mlClass: live.mlClass || '',
+    confidence: Number.isFinite(Number(live.confidence)) ? Number(live.confidence) : null
+  };
+}
+
+function predictiveRiskFor(id, f){
+  let risk = 5;
+  const reasons = [];
+
+  // Electrical stress.
+  if(f.voltage > 0){
+    if(f.voltage < 180 || f.voltage > 265){ risk += 32; reasons.push('severe voltage stress'); }
+    else if(f.voltage < 205 || f.voltage > 250){ risk += 14; reasons.push('voltage outside preferred range'); }
+  }
+
+  // Current behavior for the 50–70 W pilot lights.
+  if(f.current <= 0.04){ risk += 42; reasons.push('near-zero current'); }
+  else if(f.current < 0.12){ risk += 25; reasons.push('low current'); }
+  else if(f.current > 0.90){ risk += 36; reasons.push('overcurrent'); }
+  else if(f.current < 0.20){ risk += 12; reasons.push('degraded current'); }
+
+  // Power and previous-power change.
+  const pBase = Math.max(Math.abs(f.previousPower), 1);
+  const powerDeltaPct = Math.abs(f.power - f.previousPower) / pBase * 100;
+  if(powerDeltaPct > 35){ risk += 20; reasons.push('large power change'); }
+  else if(powerDeltaPct > 18){ risk += 9; reasons.push('power trend changing'); }
+
+  // PF / frequency.
+  if(f.pf > 0 && f.pf < 0.55){ risk += 14; reasons.push('poor power factor'); }
+  if(f.frequency > 0 && (f.frequency < 47 || f.frequency > 53)){ risk += 25; reasons.push('frequency abnormality'); }
+
+  // Service age: intentionally capped so age alone never declares a failure.
+  if(f.operatingHours > 10000){ risk += 15; reasons.push('high operating hours'); }
+  else if(f.operatingHours > 7000){ risk += 8; reasons.push('elevated operating hours'); }
+
+  // Recent history: repeated abnormal samples are stronger than one spike.
+  const hist = PREDICTIVE_HISTORY[id] || [];
+  if(hist.length >= 5){
+    const recent = hist.slice(-5);
+    const abnormal = recent.filter(x => x.risk >= 45).length;
+    if(abnormal >= 4){ risk += 18; reasons.push('repeated abnormal trend'); }
+    else if(abnormal >= 2){ risk += 8; reasons.push('recent abnormal trend'); }
+  }
+
+  // Gateway TinyML is the real edge inference; use it as a strong signal,
+  // but keep its confidence visible rather than inventing browser accuracy.
+  const gatewayFault = /FAULT|FAIL|OPEN|OFF|OVERCURRENT|VOLTAGE|ABNORMAL|DISCONNECTED|DEGRAD/i.test(f.mlClass);
+  const gatewayDim = /DIM|DEGRAD/i.test(f.mlClass) || f.gatewayStatus === 'DEGRADED';
+  if(f.gatewayStatus === 'FAULT' || gatewayFault){
+    risk += 35;
+    reasons.push('gateway TinyML fault indication');
+  } else if(gatewayDim){
+    risk += 14;
+    reasons.push('gateway TinyML degradation indication');
+  }
+
+  risk = Math.max(0, Math.min(99, Math.round(risk)));
+  let level = risk >= 70 ? 'HIGH' : risk >= 40 ? 'MEDIUM' : 'LOW';
+
+  // If the gateway says an immediate fault, don't hide it behind a low score.
+  if(f.gatewayStatus === 'FAULT') level = 'HIGH';
+
+  const days = level === 'HIGH'
+    ? Math.max(1, Math.round(7 - risk / 20))
+    : level === 'MEDIUM'
+      ? Math.max(7, Math.round(30 - risk / 3))
+      : Math.max(15, Math.round(60 - risk / 2));
+
+  let prediction = 'LOW RISK';
+  if(level === 'HIGH') prediction = f.mlClass ? f.mlClass.replaceAll('_',' ') : 'Likely failure';
+  else if(level === 'MEDIUM') prediction = f.mlClass ? f.mlClass.replaceAll('_',' ') : 'Degradation watch';
+
+  return {risk, level, days, prediction, reasons, powerDeltaPct};
+}
+
+function updatePredictiveHistory(id, features, prediction){
+  const hist = PREDICTIVE_HISTORY[id] = PREDICTIVE_HISTORY[id] || [];
+  hist.push({
+    ts: Date.now(),
+    power: features.power,
+    risk: prediction.risk,
+    voltage: features.voltage,
+    current: features.current
+  });
+  while(hist.length > PREDICTIVE_HISTORY_MAX) hist.shift();
+}
+
+function formatPredHours(hours){
+  if(!Number.isFinite(hours)) return '—';
+  return hours >= 1000 ? hours.toFixed(0) + ' h' : hours.toFixed(1) + ' h';
+}
+
+function renderPredictiveAI(focusId){
+  const tbody = document.getElementById('predictive-live-body');
+  if(!tbody) return;
+
+  const rows = [];
+  let high = 0, watch = 0, sum = 0, count = 0;
+  let latestFocus = focusId || null;
+
+  LIGHT_NODES.forEach(node => {
+    const live = LIGHT_LIVE_DATA[node.id];
+    if(!live) return;
+
+    const f = getPredictiveFeatures(node.id, live);
+    const pred = predictiveRiskFor(node.id, f);
+    PREDICTIVE_STATE[node.id] = {...pred, features:f, ts:Date.now()};
+
+    sum += pred.risk; count++;
+    if(pred.risk >= 70) high++;
+    else if(pred.risk >= 40) watch++;
+
+    const riskColor = pred.level === 'HIGH' ? 'var(--red)' : pred.level === 'MEDIUM' ? 'var(--amber)' : 'var(--green)';
+    const gateway = f.mlClass || f.gatewayStatus || '—';
+    const conf = f.confidence === null ? '—' : f.confidence.toFixed(1) + '%';
+
+    rows.push(`<tr onclick="selectPredictiveLight('${node.id}')" style="cursor:pointer;">
+      <td><b style="color:var(--cyan);font-family:'Share Tech Mono',monospace;">${node.id}</b></td>
+      <td>Zone ${node.z || '—'}</td>
+      <td>${f.voltage.toFixed(1)} V</td>
+      <td>${f.current.toFixed(3)} A</td>
+      <td>${f.power.toFixed(1)} W</td>
+      <td>${f.previousPower.toFixed(1)} W</td>
+      <td>${formatPredHours(f.operatingHours)}</td>
+      <td>${f.pf.toFixed(2)}</td>
+      <td>${f.frequency ? f.frequency.toFixed(1) + ' Hz' : '—'}</td>
+      <td style="max-width:150px;">${gateway}</td>
+      <td>${conf}</td>
+      <td><b style="color:${riskColor};">${pred.risk}%</b></td>
+      <td><span class="badge ${pred.level === 'HIGH' ? 'red' : pred.level === 'MEDIUM' ? 'amber' : 'green'}">${pred.prediction}</span></td>
+      <td style="color:${riskColor};font-family:'Share Tech Mono',monospace;">~${pred.days}d</td>
+    </tr>`);
+  });
+
+  if(!rows.length){
+    tbody.innerHTML = `<tr><td colspan="14" style="text-align:center;padding:28px;color:var(--muted);font-family:'Share Tech Mono',monospace;">Waiting for live MQTT telemetry…</td></tr>`;
+  } else {
+    tbody.innerHTML = rows.join('');
+  }
+
+  const at7 = document.getElementById('pred-at-risk-7');
+  const at30 = document.getElementById('pred-at-risk-30');
+  const avg = document.getElementById('pred-avg-risk');
+  const liveNodes = document.getElementById('pred-live-nodes');
+  if(at7) at7.textContent = high;
+  if(at30) at30.textContent = high + watch;
+  if(avg) avg.textContent = count ? Math.round(sum / count) + '%' : '—%';
+  if(liveNodes) liveNodes.textContent = count;
+  const s7 = document.getElementById('pred-risk-7-sub');
+  const s30 = document.getElementById('pred-risk-30-sub');
+  if(s7) s7.textContent = count ? 'Live prediction from current telemetry' : 'Waiting for live data';
+  if(s30) s30.textContent = count ? 'Medium + high risk nodes' : 'Waiting for live data';
+
+  const timeEl = document.getElementById('predict-last-run');
+  const statusTime = document.getElementById('pred-status-time');
+  const stamp = new Date().toLocaleTimeString('en-IN',{hour12:false});
+  if(timeEl) timeEl.textContent = 'Updated ' + stamp;
+  if(statusTime) statusTime.textContent = stamp + ' IST';
+  const tel = document.getElementById('pred-status-telemetry');
+  if(tel) { tel.textContent = count ? `LIVE · ${count} node${count===1?'':'s'}` : 'WAITING'; tel.style.color = count ? 'var(--green)' : 'var(--muted)'; }
+
+  if(!latestFocus && rows.length) latestFocus = LIGHT_NODES.find(n => LIGHT_LIVE_DATA[n.id])?.id;
+  if(latestFocus && PREDICTIVE_STATE[latestFocus]) renderPredictiveFeaturePanel(latestFocus);
+  renderPredictiveRecommendations();
+}
+
+function renderPredictiveFeaturePanel(id){
+  const panel = document.getElementById('predict-feature-panel');
+  if(!panel) return;
+  const state = PREDICTIVE_STATE[id];
+  const node = LIGHT_NODES.find(n => n.id === id);
+  if(!state || !node){ panel.innerHTML = '<div style="color:var(--muted);font-family:Share Tech Mono,monospace;font-size:11px;">No live data.</div>'; return; }
+  const f = state.features;
+  const riskColor = state.level === 'HIGH' ? 'var(--red)' : state.level === 'MEDIUM' ? 'var(--amber)' : 'var(--green)';
+  const feature = (label, value, note) => `<div style="display:grid;grid-template-columns:135px 90px 1fr;gap:8px;align-items:center;padding:7px 8px;background:rgba(255,255,255,.025);border-radius:7px;">
+    <span style="color:var(--muted);">${label}</span><b style="color:var(--text);">${value}</b><span style="color:var(--muted);">${note}</span>
+  </div>`;
+  panel.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+      <b style="color:var(--cyan);">${id} · Zone ${node.z}</b>
+      <b style="color:${riskColor};font-size:16px;">${state.risk}% ${state.level}</b>
+    </div>
+    ${feature('Voltage', f.voltage.toFixed(2)+' V', f.voltage >= 205 && f.voltage <= 250 ? 'preferred range' : 'stress signal')}
+    ${feature('Current', f.current.toFixed(3)+' A', f.current > .2 && f.current <= .9 ? 'normal operating band' : 'inspect load')}
+    ${feature('Power', f.power.toFixed(2)+' W', 'live PZEM value')}
+    ${feature('Previous Power', f.previousPower.toFixed(2)+' W', 'used for trend delta')}
+    ${feature('Operating Hours', formatPredHours(f.operatingHours), 'service-age feature')}
+    ${feature('Power Factor', f.pf.toFixed(3), f.pf >= .55 ? 'acceptable' : 'poor PF')}
+    ${feature('Frequency', f.frequency ? f.frequency.toFixed(2)+' Hz' : '—', f.frequency >= 47 && f.frequency <= 53 ? 'normal' : 'abnormal / unavailable')}
+    ${feature('Gateway TinyML', f.mlClass || f.gatewayStatus || '—', f.confidence === null ? 'no confidence field' : 'confidence '+f.confidence.toFixed(1)+'%')}
+    <div style="margin-top:5px;font-size:10px;color:var(--text2);line-height:1.6;"><b style="color:${riskColor};">Reason:</b> ${state.reasons.length ? state.reasons.join(' · ') : 'No significant risk indicators.'}</div>
+  `;
+}
+
+function renderPredictiveRecommendations(){
+  const el = document.getElementById('predict-recommendations');
+  if(!el) return;
+  const items = Object.entries(PREDICTIVE_STATE)
+    .map(([id,s]) => ({id,...s}))
+    .filter(x => x.risk >= 40)
+    .sort((a,b)=>b.risk-a.risk)
+    .slice(0,5);
+
+  if(!items.length){
+    el.innerHTML = `<div style="padding:11px;border-radius:8px;background:rgba(0,240,122,.06);border:1px solid rgba(0,240,122,.15);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:10px;">✓ No medium/high predictive risk detected from the available live readings.</div>`;
+    return;
+  }
+
+  el.innerHTML = items.map(x => {
+    const c = x.level === 'HIGH' ? 'var(--red)' : 'var(--amber)';
+    const action = x.level === 'HIGH' ? 'Inspect immediately and schedule preventive repair.' : 'Watch trend and plan preventive inspection.';
+    return `<div style="padding:10px;border-radius:8px;background:${x.level==='HIGH'?'rgba(255,59,92,.07)':'rgba(255,179,0,.07)'};border:1px solid ${x.level==='HIGH'?'rgba(255,59,92,.18)':'rgba(255,179,0,.18)'};">
+      <div style="font-weight:700;color:${c};font-size:11px;">${x.id} · ${x.risk}% ${x.level} · ~${x.days} days</div>
+      <div style="color:var(--text2);font-size:10px;line-height:1.5;margin-top:3px;">${action}</div>
+      <div style="color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:9px;margin-top:4px;">${x.reasons.join(' · ') || 'trend review required'}</div>
+    </div>`;
+  }).join('');
+}
+
+function selectPredictiveLight(id){
+  renderPredictiveFeaturePanel(id);
+}
+
+function runPredictiveModel(){
+  renderPredictiveAI();
+  const btn = document.getElementById('predict-run-btn');
+  if(btn){
+    const old = btn.textContent;
+    btn.textContent = 'Model Updated';
+    setTimeout(()=>btn.textContent = old, 900);
+  }
+  if(window.showToast) showToast('Real-time predictive model recalculated', '#bf80ff');
+}
+window.runPredictiveModel = runPredictiveModel;
+window.renderPredictiveAI = renderPredictiveAI;
+window.selectPredictiveLight = selectPredictiveLight;
+
 
 // id -> { date:'YYYY-MM-DD' (IST), startKwh } — the meter/estimate
 // reading captured at the start of each IST calendar day, so "Energy
@@ -3282,6 +3526,11 @@ function setMqttStatusBadge(state){
     hdrBadge.style.borderColor = s.bd;
     hdrBadge.style.color = s.color;
     hdrText.textContent = s.hdrLabel;
+  }
+  const predMqtt = document.getElementById('pred-status-mqtt');
+  if(predMqtt){
+    predMqtt.textContent = state.toUpperCase();
+    predMqtt.style.color = state === 'connected' ? 'var(--green)' : state === 'error' ? 'var(--red)' : 'var(--amber)';
   }
 }
 
@@ -3663,6 +3912,21 @@ function applyLiveTelemetry(data){
       reasons = classified.reasons;
     }
 
+    // Preserve the previous live sample before replacing it. This supplies
+    // the fifth RF feature (Previous Power) to the real-time predictor.
+    if(prev && prev.ts){
+      const dt = Math.max(0, now - prev.ts);
+      LIGHT_OPERATING_MS[id] = (LIGHT_OPERATING_MS[id] || 0) + dt;
+    } else if(!LIGHT_FIRST_SEEN[id]){
+      LIGHT_FIRST_SEEN[id] = now;
+      LIGHT_OPERATING_MS[id] = 0;
+    }
+
+    const gatewayOperatingHours =
+      reading.operating_hours !== undefined ? Number(reading.operating_hours) :
+      reading.operatingHours !== undefined ? Number(reading.operatingHours) :
+      reading.hours !== undefined ? Number(reading.hours) : NaN;
+
     LIGHT_LIVE_DATA[id] = {
       voltage, current, power, pf,
       freq: hasFreq ? freq : null,
@@ -3671,9 +3935,16 @@ function applyLiveTelemetry(data){
       mlClass,
       confidence: Number.isFinite(confidence) ? confidence : null,
       gatewayStatus: gatewayStatus || null,
+      operatingHours: Number.isFinite(gatewayOperatingHours) ? gatewayOperatingHours : null,
       reasons,
       ts: now
     };
+
+    // Real-time predictive inference on every MQTT telemetry packet.
+    const pfFeatures = getPredictiveFeatures(id, LIGHT_LIVE_DATA[id]);
+    const pfPrediction = predictiveRiskFor(id, pfFeatures);
+    updatePredictiveHistory(id, pfFeatures, pfPrediction);
+    PREDICTIVE_STATE[id] = {...pfPrediction, features:pfFeatures, ts:now};
 
     const node = LIGHT_NODES.find(n => n.id === id);
     if(!node) return;
@@ -3710,6 +3981,9 @@ function applyLiveTelemetry(data){
       renderManageLightsList();
     }
   }
+
+  // Keep Predictive AI synchronized with the same live MQTT tick.
+  renderPredictiveAI();
 }
 
 // Pushes a status change for one node out to the Grid map and Live map
@@ -4974,6 +5248,10 @@ async function loadLightsFromApi(){
         LIGHT_LIVE_DATA[n.id] = {
           voltage: n.live.voltage, current: n.live.current, power: n.live.power,
           pf: n.live.pf, freq: n.live.freq ?? null, kwh: n.live.kwh, kwhToday: n.live.kwhToday ?? 0,
+          mlClass: n.live.mlClass ?? n.live.ml_class ?? '',
+          confidence: n.live.confidence ?? null,
+          gatewayStatus: n.live.gatewayStatus ?? null,
+          operatingHours: n.live.operatingHours ?? n.live.operating_hours ?? null,
           reasons: [], ts: n.live.ts ? new Date(n.live.ts).getTime() : Date.now(),
         };
         // Reconstruct the equivalent client-side baseline so the NEXT
@@ -5047,6 +5325,7 @@ window.attachMnodeTooltip = attachMnodeTooltip;
   renderLiveAlerts();
   renderTechDashboard();
   recalcAndRenderKpis();
+  renderPredictiveAI();
   initMqttLive();
 })();
 
@@ -5415,6 +5694,8 @@ function exportPDF(){
 </table>
 
 <div class="footer">GlowGrid Smart Street Light Monitoring System · BIT Sathy Campus · Sathyamangalam · Report auto-generated ${dateStr}</div>
+
+
 </body>
 </html>`;
 
@@ -5751,5 +6032,24 @@ setInterval(() => {
 
 </script>
 </div>
+
+<script>
+/* ══ REAL-TIME PREDICTIVE AI REFRESH ══
+   Telemetry triggers an immediate calculation. This slower repaint updates
+   locally accumulated operating hours and the displayed risk while a node
+   remains connected between MQTT packets.
+*/
+setInterval(() => {
+  if(typeof renderPredictiveAI === 'function'){
+    renderPredictiveAI();
+  }
+}, 5000);
+
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    if(typeof renderPredictiveAI === 'function') renderPredictiveAI();
+  }, 250);
+});
+</script>
 </body>
 </html>
