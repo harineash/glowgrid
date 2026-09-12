@@ -4451,20 +4451,56 @@ function renderGridZoneOverlays(){
   layer.innerHTML = '';
   const ns = 'http://www.w3.org/2000/svg';
 
-  computeZoneRectangles().forEach(({ zone, color, count, latMin, latMax, lonMin, lonMax }) => {
-    // lat increases downward in this grid's convention (matches latLonToGridXY)
-    const topLeft = latLonToGridXY(latMax, lonMin);
-    const bottomRight = latLonToGridXY(latMin, lonMax);
-    const x = Math.min(topLeft.x, bottomRight.x);
-    const y = Math.min(topLeft.y, bottomRight.y);
-    const w = Math.abs(bottomRight.x - topLeft.x);
-    const h = Math.abs(bottomRight.y - topLeft.y);
+  // IMPORTANT: keep every zone box visually attached to the nodes that
+  // belong to that zone. The previous renderer used fixed geographic cells,
+  // which could leave a node outside its own ZONE label when the real
+  // gateway coordinates changed. The box is now calculated from the actual
+  // LIGHT_NODES positions, so the node(s) are always inside the zone.
+  const byZone = {};
+  LIGHT_NODES.forEach(node => {
+    const z = node.z || zoneForLatLon(node.lat, node.lon);
+    (byZone[z] = byZone[z] || []).push(node);
+  });
+
+  Object.keys(byZone).sort().forEach(zone => {
+    const nodes = byZone[zone];
+    const color = zoneColor(zone);
+    const points = nodes.map(n => latLonToGridXY(n.lat, n.lon));
+
+    // Padding gives the node room above/below the building label while
+    // keeping the zone compact and clearly associated with its lights.
+    const padX = 58;
+    const padTop = 38;
+    const padBottom = 34;
+    const minX = Math.min(...points.map(p => p.x));
+    const maxX = Math.max(...points.map(p => p.x));
+    const minY = Math.min(...points.map(p => p.y));
+    const maxY = Math.max(...points.map(p => p.y));
+
+    let x = Math.max(6, minX - padX);
+    let y = Math.max(6, minY - padTop);
+    let right = Math.min(694, maxX + padX);
+    let bottom = Math.min(334, maxY + padBottom);
+
+    // Guarantee a readable minimum zone size for a single node.
+    if(right - x < 150){
+      const cx = (x + right) / 2;
+      x = Math.max(6, cx - 75);
+      right = Math.min(694, cx + 75);
+      if(right - x < 150) x = Math.max(6, right - 150);
+    }
+    if(bottom - y < 100){
+      const cy = (y + bottom) / 2;
+      y = Math.max(6, cy - 50);
+      bottom = Math.min(334, cy + 50);
+      if(bottom - y < 100) y = Math.max(6, bottom - 100);
+    }
 
     const rectEl = document.createElementNS(ns, 'rect');
     rectEl.setAttribute('x', x);
     rectEl.setAttribute('y', y);
-    rectEl.setAttribute('width', w);
-    rectEl.setAttribute('height', h);
+    rectEl.setAttribute('width', right - x);
+    rectEl.setAttribute('height', bottom - y);
     rectEl.setAttribute('rx', 4);
     rectEl.setAttribute('fill', color);
     rectEl.setAttribute('fill-opacity', '0.06');
@@ -4483,7 +4519,7 @@ function renderGridZoneOverlays(){
     label.setAttribute('font-family', "'Share Tech Mono',monospace");
     label.setAttribute('pointer-events', 'none');
     label.style.textShadow = `0 0 6px ${color}`;
-    label.textContent = `ZONE ${zone} · ${count}`;
+    label.textContent = `ZONE ${zone} · ${nodes.length}`;
     layer.appendChild(label);
   });
 }
