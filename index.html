@@ -1767,446 +1767,157 @@ function logoutApp(){
   <div class="page-header">
     <div>
       <div class="page-title">ENERGY MANAGEMENT</div>
-      <div class="page-sub">POWER CHARTS · AI BRIGHTNESS SCHEDULE · SAVINGS ANALYSIS</div>
+      <div class="page-sub">REAL-TIME PZEM ENERGY · LIVE POWER TREND · AI SAVINGS ANALYSIS</div>
     </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn success">⬇ Download Report</button>
-      <button class="btn primary">Apply AI Schedule</button>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <span class="badge cyan" id="energy-live-badge">LIVE METER WAITING</span>
+      <button class="btn success" onclick="exportCSV('energy')">⬇ Download Report</button>
+      <button class="btn primary" onclick="applyEnergyAISchedule()">Apply AI Schedule</button>
     </div>
   </div>
 
   <div class="energy-top">
     <div class="card" style="padding:14px;"><div class="card-accent purple"></div>
-      <div style="font-size:20px;margin-bottom:6px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
-      <div class="kpi-num" style="color:var(--purple);font-size:22px;">187.4</div>
+      <div class="kpi-num" id="energy-kwh-today" style="color:var(--purple);font-size:22px;">0.000</div>
       <div class="kpi-lbl">kWh Today</div>
-      <div class="kpi-delta up">↓ 12% vs avg</div>
-    </div>
-    <div class="card" style="padding:14px;"><div class="card-accent green"></div>
-      <div style="font-size:20px;margin-bottom:6px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></div>
-      <div class="kpi-num" style="color:var(--green);font-size:22px;">₹3,214</div>
-      <div class="kpi-lbl">Saved This Month</div>
-      <div class="kpi-delta up">↑ vs last month</div>
+      <div class="kpi-delta" id="energy-kwh-today-sub">Live cumulative meter delta</div>
     </div>
     <div class="card" style="padding:14px;"><div class="card-accent cyan"></div>
-      <div style="font-size:20px;margin-bottom:6px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
-      <div class="kpi-num" style="color:var(--cyan);font-size:22px;">5,620</div>
-      <div class="kpi-lbl">kWh This Month</div>
-      <div class="kpi-delta up">Budget: 6,000 kWh</div>
+      <div class="kpi-num" id="energy-live-power" style="color:var(--cyan);font-size:22px;">0.0 W</div>
+      <div class="kpi-lbl">Live Power</div>
+      <div class="kpi-delta" id="energy-live-power-sub">Across live nodes</div>
+    </div>
+    <div class="card" style="padding:14px;"><div class="card-accent green"></div>
+      <div class="kpi-num" id="energy-today-cost" style="color:var(--green);font-size:22px;">₹0.00</div>
+      <div class="kpi-lbl">Estimated Cost Today</div>
+      <div class="kpi-delta" id="energy-cost-sub">Tariff: ₹8/kWh</div>
     </div>
     <div class="card" style="padding:14px;"><div class="card-accent amber"></div>
-      <div style="font-size:20px;margin-bottom:6px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div>
-      <div class="kpi-num" style="color:var(--amber);font-size:22px;">2.4T</div>
-      <div class="kpi-lbl">CO₂ Saved (yr)</div>
-      <div class="kpi-delta up">vs conventional</div>
+      <div class="kpi-num" id="energy-month-proj" style="color:var(--amber);font-size:22px;">0.0 kWh</div>
+      <div class="kpi-lbl">Projected Month</div>
+      <div class="kpi-delta" id="energy-month-sub">Based on live daily run-rate</div>
     </div>
   </div>
 
   <div class="grid2" style="margin-bottom:14px;">
-    <!-- 24h power chart -->
     <div class="card">
       <div class="card-accent purple"></div>
-      <div style="font-size:14px;font-weight:700;margin-bottom:14px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg> 24-Hour Power Consumption</div>
-      <svg viewBox="0 0 380 140" style="width:100%;overflow:visible;" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="pwrGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#a259ff" stop-opacity="0.4"/>
-            <stop offset="100%" stop-color="#a259ff" stop-opacity="0"/>
-          </linearGradient>
-        </defs>
-        <line x1="30" y1="10" x2="30" y2="120" stroke="rgba(0,210,255,0.08)" stroke-width="1"/>
-        <line x1="30" y1="120" x2="375" y2="120" stroke="rgba(0,210,255,0.08)" stroke-width="1"/>
-        <line x1="30" y1="80" x2="375" y2="80" stroke="rgba(0,210,255,0.05)" stroke-width="1" stroke-dasharray="3,3"/>
-        <line x1="30" y1="50" x2="375" y2="50" stroke="rgba(0,210,255,0.05)" stroke-width="1" stroke-dasharray="3,3"/>
-        <text x="8" y="123" fill="#3a6080" font-size="8" font-family="'Share Tech Mono',monospace">0</text>
-        <text x="5" y="83" fill="#3a6080" font-size="8" font-family="'Share Tech Mono',monospace">5kW</text>
-        <text x="3" y="53" fill="#3a6080" font-size="8" font-family="'Share Tech Mono',monospace">10kW</text>
-        <!-- Power curve — high at night, low in day -->
-        <path d="M30,45 L58,42 L86,40 L114,58 L142,90 L170,110 L198,115 L226,112 L254,95 L282,65 L310,45 L338,38 L366,36 L374,36 L374,120 L30,120 Z" fill="url(#pwrGrad)"/>
-        <path d="M30,45 L58,42 L86,40 L114,58 L142,90 L170,110 L198,115 L226,112 L254,95 L282,65 L310,45 L338,38 L366,36 L374,36" fill="none" stroke="#a259ff" stroke-width="2" stroke-linejoin="round"/>
-        <!-- AI optimized curve -->
-        <path d="M30,55 L58,52 L86,50 L114,65 L142,95 L170,112 L198,117 L226,114 L254,100 L282,72 L310,55 L338,47 L366,44 L374,44" fill="none" stroke="#00e676" stroke-width="1.5" stroke-dasharray="5,3" stroke-linejoin="round"/>
-        <!-- Hour labels -->
-        <text x="26" y="132" fill="#3a6080" font-size="7" font-family="'Share Tech Mono',monospace">00</text>
-        <text x="108" y="132" fill="#3a6080" font-size="7" font-family="'Share Tech Mono',monospace">06</text>
-        <text x="194" y="132" fill="#3a6080" font-size="7" font-family="'Share Tech Mono',monospace">12</text>
-        <text x="280" y="132" fill="#3a6080" font-size="7" font-family="'Share Tech Mono',monospace">18</text>
-        <text x="360" y="132" fill="#3a6080" font-size="7" font-family="'Share Tech Mono',monospace">24</text>
-        <!-- Legend -->
-        <rect x="30" y="138" width="10" height="3" fill="#a259ff"/>
-        <text x="44" y="141" fill="#6a9ab8" font-size="7" font-family="'Share Tech Mono',monospace">Current Usage</text>
-        <line x1="130" y1="140" x2="142" y2="140" stroke="#00e676" stroke-width="1.5" stroke-dasharray="3,2"/>
-        <text x="146" y="141" fill="#6a9ab8" font-size="7" font-family="'Share Tech Mono',monospace">AI Optimized</text>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <div style="font-size:14px;font-weight:700;">Live 24-Hour Power Consumption</div>
+        <div id="energy-chart-meta" style="font:10px 'Share Tech Mono',monospace;color:var(--muted);">Waiting for telemetry…</div>
+      </div>
+      <svg id="energy-live-chart" viewBox="0 0 520 190" style="width:100%;overflow:visible;" xmlns="http://www.w3.org/2000/svg">
+        <line x1="42" y1="15" x2="42" y2="158" stroke="rgba(0,210,255,0.10)" stroke-width="1"/>
+        <line x1="42" y1="158" x2="505" y2="158" stroke="rgba(0,210,255,0.10)" stroke-width="1"/>
+        <line x1="42" y1="110" x2="505" y2="110" stroke="rgba(0,210,255,0.05)" stroke-width="1" stroke-dasharray="3,3"/>
+        <line x1="42" y1="62" x2="505" y2="62" stroke="rgba(0,210,255,0.05)" stroke-width="1" stroke-dasharray="3,3"/>
+        <text id="energy-y0" x="5" y="161" fill="#3a6080" font-size="8" font-family="'Share Tech Mono',monospace">0W</text>
+        <text id="energy-y1" x="2" y="113" fill="#3a6080" font-size="8" font-family="'Share Tech Mono',monospace">—</text>
+        <text id="energy-y2" x="2" y="65" fill="#3a6080" font-size="8" font-family="'Share Tech Mono',monospace">—</text>
+        <polyline id="energy-power-line" points="" fill="none" stroke="#a259ff" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+        <polyline id="energy-power-area" points="" fill="rgba(162,89,255,0.12)" stroke="none"/>
+        <g id="energy-chart-dots"></g>
+        <text x="42" y="176" fill="#3a6080" font-size="7" font-family="'Share Tech Mono',monospace">-24h</text>
+        <text x="267" y="176" fill="#3a6080" font-size="7" font-family="'Share Tech Mono',monospace">-12h</text>
+        <text x="486" y="176" fill="#3a6080" font-size="7" font-family="'Share Tech Mono',monospace">NOW</text>
       </svg>
     </div>
 
-    <!-- Monthly comparison -->
     <div class="card">
       <div class="card-accent cyan"></div>
-      <div style="font-size:14px;font-weight:700;margin-bottom:14px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Monthly Consumption (kWh)</div>
-      <svg viewBox="0 0 340 140" style="width:100%;" xmlns="http://www.w3.org/2000/svg">
-        <line x1="30" y1="10" x2="30" y2="120" stroke="rgba(0,210,255,0.08)" stroke-width="1"/>
-        <line x1="30" y1="120" x2="335" y2="120" stroke="rgba(0,210,255,0.08)" stroke-width="1"/>
-        <!-- Bars -->
-        <rect x="38" y="55" width="22" height="65" rx="3" fill="rgba(0,210,255,0.25)" stroke="rgba(0,210,255,0.4)" stroke-width="1"/>
-        <rect x="82" y="48" width="22" height="72" rx="3" fill="rgba(0,210,255,0.25)" stroke="rgba(0,210,255,0.4)" stroke-width="1"/>
-        <rect x="126" y="42" width="22" height="78" rx="3" fill="rgba(0,210,255,0.25)" stroke="rgba(0,210,255,0.4)" stroke-width="1"/>
-        <rect x="170" y="50" width="22" height="70" rx="3" fill="rgba(0,210,255,0.25)" stroke="rgba(0,210,255,0.4)" stroke-width="1"/>
-        <rect x="214" y="38" width="22" height="82" rx="3" fill="rgba(0,210,255,0.25)" stroke="rgba(0,210,255,0.4)" stroke-width="1"/>
-        <rect x="258" y="32" width="22" height="88" rx="3" fill="rgba(162,89,255,0.35)" stroke="rgba(162,89,255,0.5)" stroke-width="1"/>
-        <rect x="302" y="28" width="22" height="92" rx="3" fill="rgba(0,230,118,0.3)" stroke="rgba(0,230,118,0.5)" stroke-width="1"/>
-        <!-- Values -->
-        <text x="42" y="50" fill="#6a9ab8" font-size="7" font-family="'Share Tech Mono',monospace">6.2k</text>
-        <text x="86" y="43" fill="#6a9ab8" font-size="7" font-family="'Share Tech Mono',monospace">6.5k</text>
-        <text x="130" y="37" fill="#6a9ab8" font-size="7" font-family="'Share Tech Mono',monospace">6.8k</text>
-        <text x="174" y="45" fill="#6a9ab8" font-size="7" font-family="'Share Tech Mono',monospace">6.3k</text>
-        <text x="218" y="33" fill="#6a9ab8" font-size="7" font-family="'Share Tech Mono',monospace">7.1k</text>
-        <text x="262" y="27" fill="#a259ff" font-size="7" font-family="'Share Tech Mono',monospace">7.4k</text>
-        <text x="305" y="23" fill="#00e676" font-size="7" font-family="'Share Tech Mono',monospace">5.6k</text>
-        <!-- Labels -->
-        <text x="40" y="132" fill="#3a6080" font-size="7" font-family="'Share Tech Mono',monospace">Sep</text>
-        <text x="84" y="132" fill="#3a6080" font-size="7" font-family="'Share Tech Mono',monospace">Oct</text>
-        <text x="128" y="132" fill="#3a6080" font-size="7" font-family="'Share Tech Mono',monospace">Nov</text>
-        <text x="172" y="132" fill="#3a6080" font-size="7" font-family="'Share Tech Mono',monospace">Dec</text>
-        <text x="216" y="132" fill="#3a6080" font-size="7" font-family="'Share Tech Mono',monospace">Jan</text>
-        <text x="260" y="132" fill="#a259ff" font-size="7" font-family="'Share Tech Mono',monospace">Feb</text>
-        <text x="304" y="132" fill="#00e676" font-size="7" font-family="'Share Tech Mono',monospace">Mar</text>
-      </svg>
-    </div>
-  </div>
-
-  <!-- AI Schedule -->
-  <div class="card">
-    <div class="card-accent green"></div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-      <div style="font-size:14px;font-weight:700;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg> AI-Recommended Brightness Schedule</div>
-      <span class="badge green">Saves ₹8,400/month</span>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;">
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:6px;">18:00–20:00</div>
-        <div style="font-family:'Orbitron',monospace;font-size:18px;color:var(--amber);margin-bottom:4px;">100%</div>
-        <div class="pbar"><div class="pbar-fill amber" style="width:100%;"></div></div>
-        <div style="font-size:10px;color:var(--muted);margin-top:5px;">Peak Hours</div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Live Energy by Streetlight</div>
+      <div style="overflow-x:auto;">
+        <table class="tbl">
+          <thead><tr><th>Light</th><th>Power</th><th>Energy Today</th><th>Voltage</th><th>Current</th><th>PF</th><th>Frequency</th><th>Status</th></tr></thead>
+          <tbody id="energy-node-body">
+            <tr><td colspan="8" style="text-align:center;padding:25px;color:var(--muted);font-family:'Share Tech Mono',monospace;">Waiting for live PZEM data…</td></tr>
+          </tbody>
+        </table>
       </div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:6px;">20:00–22:00</div>
-        <div style="font-family:'Orbitron',monospace;font-size:18px;color:var(--cyan);margin-bottom:4px;">85%</div>
-        <div class="pbar"><div class="pbar-fill cyan" style="width:85%;"></div></div>
-        <div style="font-size:10px;color:var(--muted);margin-top:5px;">Evening</div>
-      </div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:6px;">22:00–00:00</div>
-        <div style="font-family:'Orbitron',monospace;font-size:18px;color:var(--cyan);margin-bottom:4px;">70%</div>
-        <div class="pbar"><div class="pbar-fill cyan" style="width:70%;"></div></div>
-        <div style="font-size:10px;color:var(--muted);margin-top:5px;">Night</div>
-      </div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:6px;">00:00–02:00</div>
-        <div style="font-family:'Orbitron',monospace;font-size:18px;color:var(--green);margin-bottom:4px;">50%</div>
-        <div class="pbar"><div class="pbar-fill green" style="width:50%;"></div></div>
-        <div style="font-size:10px;color:var(--muted);margin-top:5px;">Late Night</div>
-      </div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:6px;">02:00–04:00</div>
-        <div style="font-family:'Orbitron',monospace;font-size:18px;color:var(--green);margin-bottom:4px;">30%</div>
-        <div class="pbar"><div class="pbar-fill green" style="width:30%;"></div></div>
-        <div style="font-size:10px;color:var(--muted);margin-top:5px;">Deep Night</div>
-      </div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:6px;">04:00–06:00</div>
-        <div style="font-family:'Orbitron',monospace;font-size:18px;color:var(--amber);margin-bottom:4px;">60%</div>
-        <div class="pbar"><div class="pbar-fill amber" style="width:60%;"></div></div>
-        <div style="font-size:10px;color:var(--muted);margin-top:5px;">Pre-dawn</div>
-      </div>
-    </div>
-    <div style="margin-top:12px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--muted);">
-      AI model uses traffic density, crime statistics, weather & seasonal data. Estimated monthly saving: <span style="color:var(--green);">₹8,400 (18.4% reduction)</span>
-    </div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════
-     PAGE 5: MAINTENANCE MANAGEMENT
-════════════════════════════════════════════ -->
-<div class="page" id="p-maint">
-  <div class="page-header">
-    <div>
-      <div class="page-title">MAINTENANCE MANAGEMENT</div>
-      <div class="page-sub">TECHNICIAN TASKS · AI-OPTIMIZED ROUTES · REPAIR HISTORY</div>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn warn">+ Assign New Task</button>
-      <button class="btn primary"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg> Optimize Routes</button>
-    </div>
-  </div>
-
-  <div class="grid4" style="margin-bottom:16px;">
-    <div class="card" style="padding:14px;"><div class="card-accent cyan"></div>
-      <div style="font-size:20px;margin-bottom:6px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-      <div class="kpi-num" style="color:var(--cyan);font-size:22px;">6</div>
-      <div class="kpi-lbl">Active Technicians</div>
-    </div>
-    <div class="card" style="padding:14px;"><div class="card-accent amber"></div>
-      <div style="font-size:20px;margin-bottom:6px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg></div>
-      <div class="kpi-num" style="color:var(--amber);font-size:22px;">14</div>
-      <div class="kpi-lbl">Open Tasks</div>
-    </div>
-    <div class="card" style="padding:14px;"><div class="card-accent green"></div>
-      <div style="font-size:20px;margin-bottom:6px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-      <div class="kpi-num" style="color:var(--green);font-size:22px;">8</div>
-      <div class="kpi-lbl">Completed Today</div>
-    </div>
-    <div class="card" style="padding:14px;"><div class="card-accent purple"></div>
-      <div style="font-size:20px;margin-bottom:6px;">⏱️</div>
-      <div class="kpi-num" style="color:var(--purple);font-size:22px;">2.1h</div>
-      <div class="kpi-lbl">Avg Repair Time</div>
-    </div>
-  </div>
-
-  <div class="maint-grid">
-    <!-- Technician task table -->
-    <div class="card" style="padding:0;overflow:hidden;">
-      <div style="padding:14px 18px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Technician Task Allocation</div>
-      <table class="tbl">
-        <thead><tr><th>Technician</th><th>Assigned</th><th>Fault Type</th><th>Location</th><th>Status</th><th>ETA</th><th>Contact</th></tr></thead>
-        <tbody>
-          <tr>
-            <td><div style="font-weight:700;">Ravi Kumar</div><div style="font-size:10px;color:var(--muted);">Tech #T01</div></td>
-            <td><span style="font-family:'Share Tech Mono',monospace;color:var(--cyan);">SL-04</span></td>
-            <td><span class="badge red">Lamp Failure</span></td>
-            <td><span style="font-size:11px;color:var(--text2);">Zone F, Academic Block I</span></td>
-            <td><span class="badge amber"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M5 17h1a2 2 0 1 0 4 0h4a2 2 0 1 0 4 0h1a1 1 0 0 0 1-1v-3.28a1 1 0 0 0-.27-.68l-2.7-2.9A2 2 0 0 0 15.55 8H13V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg> En Route</span></td>
-            <td><span style="font-family:'Share Tech Mono',monospace;color:var(--amber);">12 min</span></td>
-          <td><div class="contact-actions"><button class="icon-act-btn call" onclick="callTechnician('Ravi Kumar','SL-04')" title="Call Ravi Kumar: +91 63804 70158"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button><button class="icon-act-btn msg" onclick="messageTechnician('Ravi Kumar','SL-04')" title="Message Ravi Kumar: +91 63804 70158"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button></div></td></tr>
-          <tr>
-            <td><div style="font-weight:700;">Priya Selvan</div><div style="font-size:10px;color:var(--muted);">Tech #T02</div></td>
-            <td><span style="font-family:'Share Tech Mono',monospace;color:var(--cyan);">SL-09</span></td>
-            <td><span class="badge amber">Power Surge</span></td>
-            <td><span style="font-size:11px;color:var(--text2);">Zone C, Cafeteria / Food Court</span></td>
-            <td><span class="badge red"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg> On Site</span></td>
-            <td><span style="font-family:'Share Tech Mono',monospace;color:var(--green);">Active</span></td>
-          <td><div class="contact-actions"><button class="icon-act-btn call" onclick="callTechnician('Priya Selvan','SL-09')" title="Call Priya Selvan: +91 99653 15356"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button><button class="icon-act-btn msg" onclick="messageTechnician('Priya Selvan','SL-09')" title="Message Priya Selvan: +91 99653 15356"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button></div></td></tr>
-          <tr>
-            <td><div style="font-weight:700;">Arjun Nair</div><div style="font-size:10px;color:var(--muted);">Tech #T03</div></td>
-            <td><span style="font-family:'Share Tech Mono',monospace;color:var(--cyan);">SL-06</span></td>
-            <td><span class="badge red">Low Voltage</span></td>
-            <td><span style="font-size:11px;color:var(--text2);">Zone E, Boys Hostel</span></td>
-            <td><span class="badge amber"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M5 17h1a2 2 0 1 0 4 0h4a2 2 0 1 0 4 0h1a1 1 0 0 0 1-1v-3.28a1 1 0 0 0-.27-.68l-2.7-2.9A2 2 0 0 0 15.55 8H13V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg> En Route</span></td>
-            <td><span style="font-family:'Share Tech Mono',monospace;color:var(--amber);">28 min</span></td>
-          <td><div class="contact-actions"><button class="icon-act-btn call" onclick="callTechnician('Arjun Nair','SL-06')" title="Call Arjun Nair: +91 91501 61647"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button><button class="icon-act-btn msg" onclick="messageTechnician('Arjun Nair','SL-06')" title="Message Arjun Nair: +91 91501 61647"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button></div></td></tr>
-          <tr>
-            <td><div style="font-weight:700;">Suresh Raj</div><div style="font-size:10px;color:var(--muted);">Tech #T04</div></td>
-            <td><span style="font-family:'Share Tech Mono',monospace;color:var(--cyan);">SL-02*</span></td>
-            <td><span class="badge purple">Preventive</span></td>
-            <td><span style="font-size:11px;color:var(--text2);">Zone B, Admin Block</span></td>
-            <td><span class="badge cyan"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Scheduled</span></td>
-            <td><span style="font-family:'Share Tech Mono',monospace;color:var(--muted);">Tomorrow</span></td>
-          <td><div class="contact-actions"><button class="icon-act-btn call" onclick="callTechnician('Suresh Raj','SL-02')" title="Call Suresh Raj: +91 93618 36970"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button><button class="icon-act-btn msg" onclick="messageTechnician('Suresh Raj','SL-02')" title="Message Suresh Raj: +91 93618 36970"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button></div></td></tr>
-          <tr>
-            <td><div style="font-weight:700;">Meena Devi</div><div style="font-size:10px;color:var(--muted);">Tech #T05</div></td>
-            <td><span style="font-family:'Share Tech Mono',monospace;color:var(--cyan);">SL-01</span></td>
-            <td><span class="badge amber">Lamp Replaced</span></td>
-            <td><span style="font-size:11px;color:var(--text2);">Zone B, Main Gate</span></td>
-            <td><span class="badge green"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Completed</span></td>
-            <td><span style="font-family:'Share Tech Mono',monospace;color:var(--green);">Done</span></td>
-          <td><div class="contact-actions"><button class="icon-act-btn call disabled" title="Job completed"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button><button class="icon-act-btn msg disabled" title="Job completed"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button></div></td></tr>
-          <tr>
-            <td><div style="font-weight:700;">Kiran Babu</div><div style="font-size:10px;color:var(--muted);">Tech #T06</div></td>
-            <td><span style="font-family:'Share Tech Mono',monospace;color:var(--cyan);">SL-10</span></td>
-            <td><span class="badge red">Overtemp</span></td>
-            <td><span style="font-size:11px;color:var(--text2);">Zone E, Auditorium</span></td>
-            <td><span class="badge amber"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M5 17h1a2 2 0 1 0 4 0h4a2 2 0 1 0 4 0h1a1 1 0 0 0 1-1v-3.28a1 1 0 0 0-.27-.68l-2.7-2.9A2 2 0 0 0 15.55 8H13V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg> En Route</span></td>
-            <td><span style="font-family:'Share Tech Mono',monospace;color:var(--amber);">18 min</span></td>
-          <td><div class="contact-actions"><button class="icon-act-btn call" onclick="callTechnician('Kiran Babu','SL-10')" title="Call Kiran Babu"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></button><button class="icon-act-btn msg" onclick="messageTechnician('Kiran Babu','SL-10')" title="Message Kiran Babu"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button></div></td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Route & History -->
-    <div style="display:flex;flex-direction:column;gap:14px;">
-      <!-- AI Route Map — Offline Map Engine (no internet required) -->
-      <div class="card" style="padding:0;overflow:hidden;">
-        <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-          <div style="font-size:14px;font-weight:700;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg> AI-Optimized Repair Route</div>
-          <div style="display:flex;align-items:center;gap:8px;">
-            <div class="map-view-toggle" id="rmap-cov-toggle">
-              <button class="active" id="rmap-map-btn" onclick="setRouteCovLayer('map')">Map</button>
-              <button id="rmap-sat-btn" onclick="setRouteCovLayer('sat')">Satellite</button>
-            </div>
-            <span class="badge green">Live Map</span>
-          </div>
-        </div>
-        <div id="routeMap" style="width:100%;height:260px;z-index:1;position:relative;background:#060e1a;"></div>
-        <div style="padding:10px 14px;background:var(--surface);border-top:1px solid var(--border);">
-          <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> BIT Sathy Campus, Sathyamangalam · AI Route: 3.1km · Est. 14min · 2 faults
-          </div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--green);margin-top:3px;">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg> AI saved 3.4km vs manual routing · Fuel saved: ₹124
-          </div>
-        </div>
-      </div>
-
-      <!-- Repair history -->
-      <div class="card" style="flex:1;">
-        <div class="card-accent purple"></div>
-        <div style="font-size:14px;font-weight:700;margin-bottom:12px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Recent Repair History</div>
-        <div style="display:flex;flex-direction:column;gap:7px;max-height:180px;overflow-y:auto;">
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(0,230,118,0.05);border:1px solid rgba(0,230,118,0.12);border-radius:7px;">
-            <div><div style="font-size:12px;font-weight:700;">SL-01 — Lamp Replaced</div><div style="font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;">Meena Devi · 52min repair</div></div>
-            <span class="badge green"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Done</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(0,230,118,0.05);border:1px solid rgba(0,230,118,0.12);border-radius:7px;">
-            <div><div style="font-size:12px;font-weight:700;">SL-10 — Driver Fixed</div><div style="font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;">Ravi Kumar · 1.4h repair</div></div>
-            <span class="badge green"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Done</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(0,230,118,0.05);border:1px solid rgba(0,230,118,0.12);border-radius:7px;">
-            <div><div style="font-size:12px;font-weight:700;">SL-05 — Comm Module</div><div style="font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;">Arjun Nair · 2.1h repair</div></div>
-            <span class="badge green"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Done</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:rgba(0,230,118,0.05);border:1px solid rgba(0,230,118,0.12);border-radius:7px;">
-            <div><div style="font-size:12px;font-weight:700;">SL-07 — Heatsink Clean</div><div style="font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;">Kiran Babu · 45min</div></div>
-            <span class="badge green"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Done</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ════════════════════════════════════════════
-     PAGE 6: ADMIN & REPORTS
-════════════════════════════════════════════ -->
-<div class="page" id="p-admin">
-  <div class="page-header">
-    <div>
-      <div class="page-title">ADMIN &amp; REPORTS</div>
-      <div class="page-sub">STATISTICS · COST SAVINGS · EXPORTABLE SMART-CITY REPORTS</div>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn success" onclick="exportPDF()">⬇ Export PDF Report</button>
-      <button class="btn primary" onclick="exportCSV()"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Download CSV</button>
-    </div>
-  </div>
-
-  <div class="report-grid">
-    <div class="card"><div class="card-accent cyan"></div>
-      <div style="font-size:20px;margin-bottom:8px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg></div>
-      <div class="kpi-num" style="color:var(--cyan);">87</div>
-      <div class="kpi-lbl">Monthly Fault Reports</div>
-      <div class="kpi-delta up">↓ 18% vs last month</div>
-    </div>
-    <div class="card"><div class="card-accent green"></div>
-      <div style="font-size:20px;margin-bottom:8px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg></div>
-      <div class="kpi-num" style="color:var(--green);">₹42,180</div>
-      <div class="kpi-lbl">Saved by AI Prediction</div>
-      <div class="kpi-delta up">↑ This fiscal year</div>
-    </div>
-    <div class="card"><div class="card-accent purple"></div>
-      <div style="font-size:20px;margin-bottom:8px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
-      <div class="kpi-num" style="color:var(--purple);">94.1%</div>
-      <div class="kpi-lbl">AI Prediction Accuracy</div>
-      <div class="kpi-delta up">↑ 2.3% vs last model</div>
-    </div>
-    <div class="card"><div class="card-accent amber"></div>
-      <div style="font-size:20px;margin-bottom:8px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
-      <div class="kpi-num" style="color:var(--amber);">18.4%</div>
-      <div class="kpi-lbl">Energy Reduction</div>
-      <div class="kpi-delta up">vs conventional</div>
-    </div>
-    <div class="card"><div class="card-accent red"></div>
-      <div style="font-size:20px;margin-bottom:8px;">⏱️</div>
-      <div class="kpi-num" style="color:var(--red);">2.1h</div>
-      <div class="kpi-lbl">Avg Response Time</div>
-      <div class="kpi-delta up">↓ 1.4h improvement</div>
-    </div>
-    <div class="card"><div class="card-accent teal"></div>
-      <div style="font-size:20px;margin-bottom:8px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div>
-      <div class="kpi-num" style="color:var(--teal);">2.4T</div>
-      <div class="kpi-lbl">CO₂ Saved (year)</div>
-      <div class="kpi-delta up">Eco Impact</div>
     </div>
   </div>
 
   <div class="grid2" style="margin-bottom:14px;">
-    <!-- Monthly fault bar chart -->
-    <div class="card">
-      <div class="card-accent red"></div>
-      <div style="font-size:14px;font-weight:700;margin-bottom:14px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Monthly Fault Statistics</div>
-      <svg viewBox="0 0 360 160" style="width:100%;" xmlns="http://www.w3.org/2000/svg">
-        <line x1="30" y1="10" x2="30" y2="130" stroke="rgba(0,210,255,0.08)" stroke-width="1"/>
-        <line x1="30" y1="130" x2="355" y2="130" stroke="rgba(0,210,255,0.08)" stroke-width="1"/>
-        <line x1="30" y1="90" x2="355" y2="90" stroke="rgba(0,210,255,0.05)" stroke-width="1" stroke-dasharray="3,3"/>
-        <line x1="30" y1="60" x2="355" y2="60" stroke="rgba(0,210,255,0.05)" stroke-width="1" stroke-dasharray="3,3"/>
-        <!-- Bars -->
-        <rect x="38" y="60" width="26" height="70" rx="3" fill="rgba(255,59,92,0.3)" stroke="rgba(255,59,92,0.5)" stroke-width="1"/>
-        <rect x="88" y="50" width="26" height="80" rx="3" fill="rgba(255,59,92,0.3)" stroke="rgba(255,59,92,0.5)" stroke-width="1"/>
-        <rect x="138" y="42" width="26" height="88" rx="3" fill="rgba(255,59,92,0.3)" stroke="rgba(255,59,92,0.5)" stroke-width="1"/>
-        <rect x="188" y="55" width="26" height="75" rx="3" fill="rgba(255,59,92,0.3)" stroke="rgba(255,59,92,0.5)" stroke-width="1"/>
-        <rect x="238" y="46" width="26" height="84" rx="3" fill="rgba(255,59,92,0.3)" stroke="rgba(255,59,92,0.5)" stroke-width="1"/>
-        <rect x="288" y="68" width="26" height="62" rx="3" fill="rgba(0,230,118,0.25)" stroke="rgba(0,230,118,0.4)" stroke-width="1"/>
-        <text x="42" y="55" fill="#ff3b5c" font-size="7" font-family="'Share Tech Mono',monospace">104</text>
-        <text x="92" y="45" fill="#ff3b5c" font-size="7" font-family="'Share Tech Mono',monospace">118</text>
-        <text x="142" y="37" fill="#ff3b5c" font-size="7" font-family="'Share Tech Mono',monospace">128</text>
-        <text x="192" y="50" fill="#ff3b5c" font-size="7" font-family="'Share Tech Mono',monospace">110</text>
-        <text x="242" y="41" fill="#ff3b5c" font-size="7" font-family="'Share Tech Mono',monospace">122</text>
-        <text x="292" y="63" fill="#00e676" font-size="7" font-family="'Share Tech Mono',monospace">87↓</text>
-        <text x="40" y="142" fill="#3a6080" font-size="7" font-family="'Share Tech Mono',monospace">Oct</text>
-        <text x="90" y="142" fill="#3a6080" font-size="7" font-family="'Share Tech Mono',monospace">Nov</text>
-        <text x="140" y="142" fill="#3a6080" font-size="7" font-family="'Share Tech Mono',monospace">Dec</text>
-        <text x="190" y="142" fill="#3a6080" font-size="7" font-family="'Share Tech Mono',monospace">Jan</text>
-        <text x="240" y="142" fill="#3a6080" font-size="7" font-family="'Share Tech Mono',monospace">Feb</text>
-        <text x="290" y="142" fill="#00e676" font-size="7" font-family="'Share Tech Mono',monospace">Mar</text>
-      </svg>
-    </div>
-
-    <!-- Savings breakdown -->
     <div class="card">
       <div class="card-accent green"></div>
-      <div style="font-size:14px;font-weight:700;margin-bottom:14px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg> Cost Savings Due to AI Prediction</div>
-      <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:16px;">
-        <div class="pbar-wrap"><div class="pbar-top"><span style="font-size:13px;">Preventive vs Reactive Repairs</span><span style="color:var(--green);">₹18,200</span></div><div class="pbar"><div class="pbar-fill green" style="width:72%;"></div></div></div>
-        <div class="pbar-wrap"><div class="pbar-top"><span style="font-size:13px;">Energy Optimization</span><span style="color:var(--cyan);">₹14,600</span></div><div class="pbar"><div class="pbar-fill cyan" style="width:58%;"></div></div></div>
-        <div class="pbar-wrap"><div class="pbar-top"><span style="font-size:13px;">Route Optimization</span><span style="color:var(--purple);">₹5,840</span></div><div class="pbar"><div class="pbar-fill purple" style="width:23%;"></div></div></div>
-        <div class="pbar-wrap"><div class="pbar-top"><span style="font-size:13px;">Reduced Downtime</span><span style="color:var(--amber);">₹3,540</span></div><div class="pbar"><div class="pbar-fill amber" style="width:14%;"></div></div></div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;">AI Energy Optimization</div>
+      <div id="energy-ai-summary" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text2);line-height:1.7;margin-bottom:12px;">
+        Waiting for live readings. The AI schedule will use the current power profile and node status.
       </div>
-      <div style="background:rgba(0,230,118,0.07);border:1px solid rgba(0,230,118,0.2);border-radius:8px;padding:12px;text-align:center;">
-        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:4px;">TOTAL ANNUAL SAVINGS</div>
-        <div style="font-family:'Orbitron',monospace;font-size:24px;color:var(--green);">₹5,06,160</div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px;">Projected (extrapolated from Q1 data)</div>
+      <div id="energy-ai-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <div style="margin-top:12px;padding:10px;border-radius:8px;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.15);font:9px 'Share Tech Mono',monospace;color:var(--muted);">
+        AI schedule is a dashboard recommendation until a physical dimming/lighting command topic is implemented in the gateway.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-accent amber"></div>
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Energy & Cost Projection</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;">
+        <div style="padding:10px;background:rgba(255,255,255,.025);border-radius:8px;">
+          <div style="font:9px 'Share Tech Mono',monospace;color:var(--muted);">TODAY</div>
+          <div id="energy-proj-today" style="font:700 18px Orbitron,monospace;color:var(--cyan);">0.000 kWh</div>
+        </div>
+        <div style="padding:10px;background:rgba(255,255,255,.025);border-radius:8px;">
+          <div style="font:9px 'Share Tech Mono',monospace;color:var(--muted);">30-DAY RUN RATE</div>
+          <div id="energy-proj-30" style="font:700 18px Orbitron,monospace;color:var(--amber);">0.0 kWh</div>
+        </div>
+        <div style="padding:10px;background:rgba(255,255,255,.025);border-radius:8px;">
+          <div style="font:9px 'Share Tech Mono',monospace;color:var(--muted);">TODAY COST</div>
+          <div id="energy-proj-cost" style="font:700 18px Orbitron,monospace;color:var(--green);">₹0.00</div>
+        </div>
+        <div style="padding:10px;background:rgba(255,255,255,.025);border-radius:8px;">
+          <div style="font:9px 'Share Tech Mono',monospace;color:var(--muted);">MONTH COST</div>
+          <div id="energy-proj-month-cost" style="font:700 18px Orbitron,monospace;color:var(--purple);">₹0.00</div>
+        </div>
+      </div>
+      <div id="energy-assumption-note" style="margin-top:12px;font:9px 'Share Tech Mono',monospace;color:var(--muted);line-height:1.6;">
+        Projection uses the live daily energy run-rate. Cost uses configurable tariff ₹8/kWh. Replace with your actual tariff for an exact bill estimate.
       </div>
     </div>
   </div>
 
-  <!-- Exportable reports -->
   <div class="card">
     <div class="card-accent cyan"></div>
-    <div style="font-size:14px;font-weight:700;margin-bottom:14px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Exportable Smart-City Reports</div>
+    <div style="font-size:14px;font-weight:700;margin-bottom:12px;">Energy Data Status</div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(0,210,255,0.4)'" onmouseout="this.style.borderColor='rgba(0,210,255,0.1)'" onclick="exportCSV('monthly')">
-        <div style="font-size:28px;margin-bottom:8px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
-        <div style="font-size:13px;font-weight:700;margin-bottom:4px;">Monthly Summary</div>
-        <div style="font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;">CSV · JSON</div>
-        <div style="margin-top:10px;"><button class="btn sm primary" onclick="event.stopPropagation();exportCSV('monthly')">Download</button></div>
+      <div style="padding:10px;background:var(--surface2);border-radius:8px;">
+        <div style="font:9px 'Share Tech Mono',monospace;color:var(--muted);">METER SOURCE</div>
+        <div id="energy-source" style="font-weight:700;color:var(--green);">PZEM / GATEWAY</div>
       </div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(255,59,92,0.4)'" onmouseout="this.style.borderColor='rgba(0,210,255,0.1)'" onclick="exportCSV('faults')">
-        <div style="font-size:28px;margin-bottom:8px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-        <div style="font-size:13px;font-weight:700;margin-bottom:4px;">Fault Analysis</div>
-        <div style="font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;">CSV</div>
-        <div style="margin-top:10px;"><button class="btn sm danger" onclick="event.stopPropagation();exportCSV('faults')">Download</button></div>
+      <div style="padding:10px;background:var(--surface2);border-radius:8px;">
+        <div style="font:9px 'Share Tech Mono',monospace;color:var(--muted);">LIVE NODES</div>
+        <div id="energy-live-count" style="font-weight:700;color:var(--cyan);">0</div>
       </div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(0,230,118,0.4)'" onmouseout="this.style.borderColor='rgba(0,210,255,0.1)'" onclick="exportCSV('energy')">
-        <div style="font-size:28px;margin-bottom:8px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+      <div style="padding:10px;background:var(--surface2);border-radius:8px;">
+        <div style="font:9px 'Share Tech Mono',monospace;color:var(--muted);">TOTAL POWER</div>
+        <div id="energy-total-power" style="font-weight:700;color:var(--purple);">0.0 W</div>
+      </div>
+      <div style="padding:10px;background:var(--surface2);border-radius:8px;">
+        <div style="font:9px 'Share Tech Mono',monospace;color:var(--muted);">LAST UPDATE</div>
+        <div id="energy-last-update" style="font-weight:700;color:var(--amber);">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px;">
+    <div class="card-accent green"></div>
+    <div style="font-size:14px;font-weight:700;margin-bottom:14px;">Exportable Smart-City Reports</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
         <div style="font-size:13px;font-weight:700;margin-bottom:4px;">Energy Report</div>
-        <div style="font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;">CSV</div>
-        <div style="margin-top:10px;"><button class="btn sm success" onclick="event.stopPropagation();exportCSV('energy')">Download</button></div>
+        <div style="font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;">Current live meter snapshot</div>
+        <div style="margin-top:10px;"><button class="btn sm success" onclick="exportCSV('energy')">Download CSV</button></div>
       </div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(162,89,255,0.4)'" onmouseout="this.style.borderColor='rgba(0,210,255,0.1)'" onclick="exportPDF()">
-        <div style="font-size:28px;margin-bottom:8px;"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg></div>
-        <div style="font-size:13px;font-weight:700;margin-bottom:4px;">AI Insights Report</div>
-        <div style="font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;">PDF</div>
-        <div style="margin-top:10px;"><button class="btn sm" style="border-color:rgba(162,89,255,0.3);color:var(--purple);" onclick="event.stopPropagation();exportPDF()">Download</button></div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px;">Monthly Summary</div>
+        <div style="font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;">Live run-rate summary</div>
+        <div style="margin-top:10px;"><button class="btn sm primary" onclick="exportCSV('monthly')">Download CSV</button></div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;">
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px;">AI Insights</div>
+        <div style="font-size:10px;color:var(--muted);font-family:'Share Tech Mono',monospace;">Live predictive + energy state</div>
+        <div style="margin-top:10px;"><button class="btn sm" style="border-color:rgba(162,89,255,.3);color:var(--purple);" onclick="exportPDF()">Download PDF</button></div>
       </div>
     </div>
   </div>
@@ -3051,6 +2762,197 @@ const MQTT_SILENCE_TOPIC = 'streetlights/silence';
 const LIGHT_SIREN_STATE = {};
 
 // Latest telemetry per light ID: { voltage, current, power, pf, freq, kwh, kwhToday, ts }
+
+
+// ══ REAL-TIME ENERGY MANAGEMENT ══
+const ENERGY_TARIFF_INR_PER_KWH = 8.0; // Change to the actual campus tariff.
+const ENERGY_STATE = {
+  samples: [],       // {ts,totalPower}
+  lastRender: 0,
+  aiScheduleApplied: false
+};
+
+function updateEnergyFromLive(){
+  const ids = LIGHT_NODES.filter(n => LIGHT_LIVE_DATA[n.id]);
+  const totalPower = ids.reduce((sum,n) => sum + Number(LIGHT_LIVE_DATA[n.id].power || 0), 0);
+  const totalToday = ids.reduce((sum,n) => sum + Number(LIGHT_LIVE_DATA[n.id].kwhToday || 0), 0);
+  const now = Date.now();
+
+  if(ids.length){
+    const last = ENERGY_STATE.samples[ENERGY_STATE.samples.length - 1];
+    if(!last || now - last.ts >= 5000){
+      ENERGY_STATE.samples.push({ts:now,totalPower});
+      const cutoff = now - 24*3600000;
+      ENERGY_STATE.samples = ENERGY_STATE.samples.filter(s => s.ts >= cutoff);
+    }
+  }
+
+  const todayEl = document.getElementById('energy-kwh-today');
+  const powerEl = document.getElementById('energy-live-power');
+  const costEl = document.getElementById('energy-today-cost');
+  const monthEl = document.getElementById('energy-month-proj');
+
+  if(todayEl) todayEl.textContent = totalToday.toFixed(3);
+  if(powerEl) powerEl.textContent = totalPower.toFixed(1) + ' W';
+  if(costEl) costEl.textContent = '₹' + (totalToday * ENERGY_TARIFF_INR_PER_KWH).toFixed(2);
+
+  // If the first live sample was received part-way through the day, a full-day
+  // projection is intentionally marked as a run-rate estimate.
+  const firstToday = LIGHT_NODES.map(n => LIGHT_LIVE_DATA[n.id]).filter(Boolean)
+    .map(l => l.kwhToday || 0);
+  const maxToday = firstToday.length ? Math.max(...firstToday) : 0;
+  const elapsedHours = Math.max(0.25, (new Date().getHours() + new Date().getMinutes()/60));
+  const projectedDay = maxToday > 0 ? maxToday / elapsedHours * 24 : 0;
+  const projectedMonth = projectedDay * 30;
+
+  if(monthEl) monthEl.textContent = projectedMonth.toFixed(1) + ' kWh';
+  const projToday = document.getElementById('energy-proj-today');
+  const proj30 = document.getElementById('energy-proj-30');
+  const projCost = document.getElementById('energy-proj-cost');
+  const projMonthCost = document.getElementById('energy-proj-month-cost');
+  if(projToday) projToday.textContent = totalToday.toFixed(3) + ' kWh';
+  if(proj30) proj30.textContent = projectedMonth.toFixed(1) + ' kWh';
+  if(projCost) projCost.textContent = '₹' + (totalToday * ENERGY_TARIFF_INR_PER_KWH).toFixed(2);
+  if(projMonthCost) projMonthCost.textContent = '₹' + (projectedMonth * ENERGY_TARIFF_INR_PER_KWH).toFixed(2);
+
+  const countEl = document.getElementById('energy-live-count');
+  const totalPowerEl = document.getElementById('energy-total-power');
+  const lastEl = document.getElementById('energy-last-update');
+  const badge = document.getElementById('energy-live-badge');
+  if(countEl) countEl.textContent = ids.length;
+  if(totalPowerEl) totalPowerEl.textContent = totalPower.toFixed(1) + ' W';
+  if(lastEl) lastEl.textContent = ids.length ? new Date(Math.max(...ids.map(n=>LIGHT_LIVE_DATA[n.id].ts))).toLocaleTimeString('en-IN',{hour12:false}) : '—';
+  if(badge){
+    badge.textContent = ids.length ? `LIVE · ${ids.length} NODE${ids.length===1?'':'S'}` : 'LIVE METER WAITING';
+    badge.className = 'badge ' + (ids.length ? 'green' : 'cyan');
+  }
+
+  const sub = document.getElementById('energy-kwh-today-sub');
+  if(sub) sub.textContent = ids.length ? 'Sum of live PZEM daily deltas' : 'Waiting for gateway telemetry';
+  const powerSub = document.getElementById('energy-live-power-sub');
+  if(powerSub) powerSub.textContent = ids.length ? `${ids.length} active telemetry source${ids.length===1?'':'s'}` : 'Across live nodes';
+
+  renderEnergyNodeTable(ids);
+  renderEnergyChart();
+  renderEnergyAISummary(ids, totalPower);
+}
+
+function renderEnergyNodeTable(nodes){
+  const body = document.getElementById('energy-node-body');
+  if(!body) return;
+  if(!nodes.length){
+    body.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:25px;color:var(--muted);font-family:'Share Tech Mono',monospace;">Waiting for live PZEM data…</td></tr>`;
+    return;
+  }
+  body.innerHTML = nodes.map(n => {
+    const l = LIGHT_LIVE_DATA[n.id];
+    const sc = n.s === 'fault' ? 'var(--red)' : n.s === 'dim' ? 'var(--amber)' : 'var(--green)';
+    return `<tr>
+      <td><b style="color:var(--cyan);font-family:'Share Tech Mono',monospace;">${n.id}</b></td>
+      <td>${Number(l.power||0).toFixed(1)} W</td>
+      <td>${Number(l.kwhToday||0).toFixed(3)} kWh</td>
+      <td>${Number(l.voltage||0).toFixed(1)} V</td>
+      <td>${Number(l.current||0).toFixed(3)} A</td>
+      <td>${Number(l.pf||0).toFixed(2)}</td>
+      <td>${l.freq ? Number(l.freq).toFixed(1)+' Hz' : '—'}</td>
+      <td><b style="color:${sc};">${n.s.toUpperCase()}</b></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderEnergyChart(){
+  const line = document.getElementById('energy-power-line');
+  const area = document.getElementById('energy-power-area');
+  const dots = document.getElementById('energy-chart-dots');
+  if(!line || !area || !dots) return;
+
+  const samples = ENERGY_STATE.samples;
+  if(!samples.length){
+    line.setAttribute('points','');
+    area.setAttribute('points','');
+    dots.innerHTML='';
+    return;
+  }
+
+  const maxPower = Math.max(100, ...samples.map(s=>s.totalPower));
+  const minT = samples[0].ts;
+  const maxT = Math.max(samples[samples.length-1].ts, minT + 1);
+  const points = samples.map(s => {
+    const x = 42 + ((s.ts-minT)/(maxT-minT))*463;
+    const y = 158 - (s.totalPower/maxPower)*128;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+  line.setAttribute('points', points);
+  area.setAttribute('points', `${points} 505,158 42,158`);
+
+  document.getElementById('energy-y1').textContent = (maxPower/2).toFixed(0)+'W';
+  document.getElementById('energy-y2').textContent = maxPower.toFixed(0)+'W';
+  const meta = document.getElementById('energy-chart-meta');
+  if(meta) meta.textContent = `${samples.length} live samples · peak ${maxPower.toFixed(1)} W`;
+
+  const recent = samples.slice(-12);
+  dots.innerHTML = recent.map(s => {
+    const x = 42 + ((s.ts-minT)/(maxT-minT))*463;
+    const y = 158 - (s.totalPower/maxPower)*128;
+    return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.2" fill="#fff" opacity=".8"><title>${new Date(s.ts).toLocaleTimeString('en-IN',{hour12:false})} · ${s.totalPower.toFixed(1)} W</title></circle>`;
+  }).join('');
+}
+
+function renderEnergyAISummary(nodes,totalPower){
+  const summary = document.getElementById('energy-ai-summary');
+  const list = document.getElementById('energy-ai-list');
+  if(!summary || !list) return;
+
+  if(!nodes.length){
+    summary.textContent = 'Waiting for live readings. The AI schedule will use the current power profile and node status.';
+    list.innerHTML = '';
+    return;
+  }
+
+  const suggestions = nodes.map(n => {
+    const l = LIGHT_LIVE_DATA[n.id];
+    const power = Number(l.power||0);
+    const risk = PREDICTIVE_STATE[n.id];
+    let action = 'Maintain current output';
+    let saving = 0;
+
+    if(n.s === 'fault'){
+      action = 'Avoid scheduling additional load; inspect fault first';
+    } else if(n.s === 'dim'){
+      action = 'Keep dim/degraded state and schedule inspection';
+    } else if(power > 65){
+      action = 'Consider lower brightness during low-traffic hours';
+      saving = power * 0.30;
+    } else if(power > 45){
+      action = 'Consider 20% brightness reduction during low-traffic hours';
+      saving = power * 0.20;
+    }
+
+    return {id:n.id, action, saving, risk};
+  });
+
+  const potentialW = suggestions.reduce((s,x)=>s+x.saving,0);
+  summary.innerHTML = `${nodes.length} live node${nodes.length===1?'':'s'} · ${totalPower.toFixed(1)} W now · estimated optimization opportunity <b style="color:var(--green);">${potentialW.toFixed(1)} W</b> during scheduled low-traffic periods.`;
+
+  list.innerHTML = suggestions.map(x => {
+    const riskText = x.risk ? ` · predictive risk ${x.risk.risk}%` : '';
+    return `<div style="padding:9px;border-radius:8px;background:rgba(255,255,255,.025);border:1px solid var(--border);">
+      <b style="color:var(--cyan);font-family:'Share Tech Mono',monospace;">${x.id}</b>
+      <span style="color:var(--text2);font-size:10px;"> — ${x.action}${riskText}</span>
+    </div>`;
+  }).join('');
+}
+
+function applyEnergyAISchedule(){
+  ENERGY_STATE.aiScheduleApplied = true;
+  renderEnergyAISummary(
+    LIGHT_NODES.filter(n=>LIGHT_LIVE_DATA[n.id]),
+    LIGHT_NODES.reduce((s,n)=>s+(LIGHT_LIVE_DATA[n.id]?.power||0),0)
+  );
+  if(window.showToast) showToast('AI energy schedule calculated from live telemetry', '#00e676');
+}
+window.updateEnergyFromLive = updateEnergyFromLive;
+window.applyEnergyAISchedule = applyEnergyAISchedule;
 
 const LIGHT_LIVE_DATA = {};
 
@@ -3982,8 +3884,9 @@ function applyLiveTelemetry(data){
     }
   }
 
-  // Keep Predictive AI synchronized with the same live MQTT tick.
+  // Keep Predictive AI and Energy synchronized with the same live MQTT tick.
   renderPredictiveAI();
+  updateEnergyFromLive();
 }
 
 // Pushes a status change for one node out to the Grid map and Live map
@@ -5326,6 +5229,7 @@ window.attachMnodeTooltip = attachMnodeTooltip;
   renderTechDashboard();
   recalcAndRenderKpis();
   renderPredictiveAI();
+  updateEnergyFromLive();
   initMqttLive();
 })();
 
@@ -6042,6 +5946,9 @@ setInterval(() => {
 setInterval(() => {
   if(typeof renderPredictiveAI === 'function'){
     renderPredictiveAI();
+  }
+  if(typeof updateEnergyFromLive === 'function'){
+    updateEnergyFromLive();
   }
 }, 5000);
 
